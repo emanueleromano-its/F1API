@@ -1,0 +1,4 @@
+# Dipendenze minime del progetto
+Flask
+requests
+# Aggiungere altre dipendenze qui
