@@ -1,4 +1,6 @@
 # Dipendenze minime del progetto
 Flask
 requests
+# Visualizzazione
+matplotlib
 # Aggiungere altre dipendenze qui

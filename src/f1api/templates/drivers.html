@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Drivers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <h1>Drivers</h1>
+    {% if error %}
+    <div style="color:red;">Error: {{ error }}</div>
+    {% endif %}
+
+    {% if items and items|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                {% for col in cols %}
+                <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% set driver_list = []%}
+            {% for item in items %}
+            {% if item.get('broadcast_name') not in driver_list %}
+            {% if item.get('headshot_url') %}
+            {% if item.get('full_name').split(' ')[0] == item.get('first_name') %}
+            <tr>
+                {% for col in cols %}
+                {% if col == "headshot_url" %}
+                <td><img class="headshot" src="{{ item.get(col) }}" alt="Headshot"></td>
+                {% else %}
+                <td>{{ item.get(col) }}</td>
+                {% endif %}
+                {% endfor %}
+            </tr>
+            {% set driver_list = driver_list + [item.get('broadcast_name')] %}
+            {% endif %}
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No items to display.</p>
+    {% endif %}
+</body>
+
+</html>

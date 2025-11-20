@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Races</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <h1>Races</h1>
+  {% if error %}
+    <div style="color:red;">Error: {{ error }}</div>
+  {% endif %}
+
+  {% if items and items|length > 0 %}
+    {% set cols = items[0].keys() %}
+    <table>
+      <thead>
+        <tr>
+          {% for col in cols %}
+            {% if col != "session_type" %}
+                <th>{{ col }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            {% for col in cols %}
+              {% if col != "session_type" %}
+                <td>{{ item.get(col) }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No items to display.</p>
+  {% endif %}
+</body>
+</html>

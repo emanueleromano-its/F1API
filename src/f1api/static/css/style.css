@@ -1,0 +1,91 @@
+/* Simple Formula 1 themed stylesheet */
+:root{
+  --bg: #0b0b0d;
+  --surface: #0f1113;
+  --muted: #9aa0a6;
+  --accent: #e10600; /* F1 red accent */
+  --card: #121216;
+  --text: #ffffff;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  font-weight:400;
+  background: linear-gradient(180deg,var(--bg), #0f0f11 120px);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  padding:24px;
+}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+header.site-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.site-title{
+  font-size:20px;
+  letter-spacing:0.6px;
+  color:var(--text);
+  margin:0;
+}
+
+.site-subtle{
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* Table */
+table{
+  width:90%;
+  margin: 0 auto;
+  border-collapse:collapse;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 4px 18px rgba(0,0,0,0.6);
+}
+
+th, td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  text-align:center;
+  vertical-align:middle;
+}
+
+th{
+  background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color:var(--muted);
+  font-size:13px;
+  text-transform:uppercase;
+}
+
+tbody tr:hover{background: linear-gradient(90deg, rgba(225,16,0,0.03), rgba(255,255,255,0.01));}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  background:rgba(225,16,0,0.12);
+  color:var(--accent);
+  border-radius:4px;
+  font-weight:600;
+  font-size:12px;
+}
+
+a{color:var(--accent); text-decoration:none}
+
+img.headshot{border-radius:6px; display:block}
+
+/* Small screens */
+@media (max-width:720px){
+  th, td{padding:8px}
+  .site-title{font-size:18px}
+}
