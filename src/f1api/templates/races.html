@@ -1,12 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Races</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Races - F1API{% endblock %}
+
+{% block content %}
   <h1>Races</h1>
   {% if error %}
     <div style="color:red;">Error: {{ error }}</div>
@@ -39,5 +35,4 @@
   {% else %}
     <p>No items to display.</p>
   {% endif %}
-</body>
-</html>
+{% endblock %}

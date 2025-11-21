@@ -9,15 +9,27 @@
 }
 
 *{box-sizing:border-box}
+/* Custom font setup
+   - Copy your font files (woff2/woff/ttf) into `src/f1api/static/fonts/`
+   - Replace the filenames below with the real ones you have (e.g. "Inter-Variable.woff2").
+*/
+
+@font-face {
+  font-family: 'InterCustom';
+  src: url('/static/fonts/Formula1-Regular_web_0.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 body{
   margin:0;
-  font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 20px;
+  font-family: 'InterCustom', Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
   font-weight:400;
   background: linear-gradient(180deg,var(--bg), #0f0f11 120px);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
-  padding:24px;
 }
 
 .container{
@@ -25,23 +37,51 @@ body{
   margin:0 auto;
 }
 
+/* Header / top navigation */
 header.site-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 12px 0;
   margin-bottom:18px;
 }
 
-.site-title{
-  font-size:20px;
-  letter-spacing:0.6px;
-  color:var(--text);
-  margin:0;
+.site-header .container{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 }
 
-.site-subtle{
+.brand{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:0.6px;
+  color:var(--text);
+  text-decoration:none;
+}
+
+.top-nav{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.top-nav a{
   color:var(--muted);
-  font-size:13px;
+  padding:6px 10px;
+  border-radius:6px;
+  transition: all .12s ease;
+}
+
+.top-nav a:hover{
+  color:var(--text);
+  background: rgba(255,255,255,0.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+.top-nav a.active{
+  color:var(--accent);
+  font-weight:700;
 }
 
 /* Table */
@@ -51,13 +91,16 @@ table{
   border-collapse:collapse;
   background:var(--card);
   color:var(--text);
-  box-shadow:0 4px 18px rgba(0,0,0,0.6);
+  box-shadow:0 4px 18px var(--accent)/*rgba(0,0,0,0.6)*/;
+  border-radius:20px;
+  overflow:hidden;
 }
 
 th, td{
   padding:10px 12px;
   border-bottom:1px solid rgba(255,255,255,0.03);
   text-align:center;
+  image-rendering: crisp-edges;
   vertical-align:middle;
 }
 

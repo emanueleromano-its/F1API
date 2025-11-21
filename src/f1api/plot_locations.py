@@ -18,6 +18,8 @@ import sys
 from typing import Any, Dict, List, Optional
 
 import requests
+import os
+import io
 import matplotlib.pyplot as plt
 
 
@@ -93,7 +95,8 @@ def extract_xy(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             # alcuni dataset possono avere x/y come stringhe -> cast a float
             y = r.get("x")
             x = r.get("y")
-            x = -x;
+            driver_number = r.get("driver_number")
+            y= -y;
             if x is None or y is None:
                 continue
             x_val = float(x)
@@ -130,11 +133,15 @@ def plot_xy(points: List[Dict[str, Any]], title: Optional[str] = None) -> None:
     if not points:
         print("Nessun punto xy da plottare")
         return
-
+    for point in points:
+        if point["driver_number"]==4:
+            xs = point["x"]=point["x"]+1000
+            ys = point["y"]=point["y"]+500
     xs = [p["x"] for p in points]
     ys = [p["y"] for p in points]
 
     fig, ax = plt.subplots(figsize=(8, 6))
+    
     ax.scatter(xs, ys, c="tab:blue", s=40)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
@@ -147,6 +154,37 @@ def plot_xy(points: List[Dict[str, Any]], title: Optional[str] = None) -> None:
 
     # manteniamo rapporto di aspetto uguale per non deformare il piano cartesiano
     ax.set_aspect("equal", adjustable="datalim")
+    # optional background image: path or URL passed via env var F1_BG_IMAGE
+    import matplotlib.image as mpimg
+    bg_path = os.environ.get("F1_BG_IMAGE")
+    if bg_path:
+        try:
+            if bg_path.startswith(("http://", "https://")):
+                resp = requests.get(bg_path, timeout=5)
+                resp.raise_for_status()
+                img = mpimg.imread(io.BytesIO(resp.content), format=None)
+            else:
+                img = mpimg.imread("src\\f1api\\c0bcb433231b430d8586c98f252ee4fd.webp")
+
+            # calcoliamo estensione dell'immagine per coprire i dati (aggiungiamo margine)
+            x_min, x_max = min(xs), max(xs)
+            y_min, y_max = min(ys), max(ys)
+            dx = (x_max - x_min) * 0.1 or 1.0
+            dy = (y_max - y_min) * 0.1 or 1.0
+
+            ax.imshow(
+                img,
+                extent=(x_min - dx, x_max + dx, y_min - dy, y_max + dy),
+                aspect="auto",
+                zorder=0,
+            )
+
+            # assicuriamoci che gli assi includano l'immagine
+            ax.set_xlim(x_min - dx, x_max + dx)
+            ax.set_ylim(y_min - dy, y_max + dy)
+        except Exception as exc:  # pragma: no cover - best-effort background only
+            print(f"Impossibile caricare immagine di sfondo '{bg_path}': {exc}")
+
     plt.tight_layout()
     plt.show()
 
@@ -169,12 +207,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     else:
         parser.print_help()
         return 1
-
-    # stampiamo i record originali
-    print_records(records)
+    unique_records = {json.dumps(r, sort_keys=True): r for r in records}
 
     # estraiamo x,y e plottiamo
-    points = extract_xy(records)
+    points = extract_xy(unique_records.values())
     print(f"\nTrovati {len(points)} punti con coordinate x,y\n")
     plot_xy(points)
     return 0

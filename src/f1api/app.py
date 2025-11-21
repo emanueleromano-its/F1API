@@ -12,27 +12,11 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, Optional
 
-import requests
-from flask import Flask, jsonify, request, render_template
-
-
-F1OPEN_API_BASE = os.getenv("F1OPEN_API_BASE", "https://api.openf1.org/v1")
-
-
-def fetch_from_f1open(path: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-    """Esegue una GET verso l'API F1Open e ritorna il JSON (o None in caso di errore).
-
-    path: percorso relativo (senza slash iniziale) es. 'drivers' o 'races/2024'.
-    params: dizionario di query params.
-    """
-    url = f"{F1OPEN_API_BASE.rstrip('/')}/{path.lstrip('/')}"
-    try:
-        resp = requests.get(url, params=params or {}, timeout=10)
-        resp.raise_for_status()
-        return resp.json()
-    except requests.RequestException as exc:
-        # Log più avanzato può essere aggiunto qui
-        return {"error": str(exc), "status_code": getattr(exc.response, "status_code", None)}
+from flask import Flask
+from f1api.routes.drivers import drivers_bp
+from f1api.routes.races import races_bp
+from f1api.routes.main import main_bp
+from f1api.api import F1OPEN_API_BASE
 
 
 def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
@@ -42,94 +26,30 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     if test_config:
         app.config.update(test_config)
 
+    def safe_color(value: Any) -> str:
+        """Ritorna un colore esadecimale valido o un default.
 
-    @app.route("/", methods=["GET"])
-    def index():
-        return jsonify({
-            "service": "F1API (scaffold)",
-            "endpoints": [
-                {"path": "/drivers", "desc": "Elenca o cerca piloti"},
-                {"path": "/drivers/<id>", "desc": "Dettagli pilota"},
-                {"path": "/teams", "desc": "Elenca i team"},
-                {"path": "/races", "desc": "Elenca le gare"},
-            ],
-        })
-
-    @app.route("/drivers", methods=["GET"])
-    def drivers():
-        """Esempio: /drivers?search=alonso
-
-        Il comportamento concreto dipende dal formato dell'API F1Open.
-        Qui forwardiamo semplicemente il parametro `search` come query.
+        Manteniamo la semplice logica esistente: se il valore è una stringa
+        con 6 caratteri hex lo normalizziamo con '#' e minuscolo, altrimenti
+        ritorniamo un colore di default.
         """
-        q = request.args.get("search")
-        params = {"search": q} if q else {}
-        data = fetch_from_f1open("drivers", params=params)
-        
-        items = []
-        if isinstance(data, list):
-            items = data
-        elif isinstance(data, dict):
-            if data.get("error"):
-                return render_template("drivers.html", error=data.get("error"), items=[])
-            for v in data.values():
-                if isinstance(v, list):
-                    items = v
-                    break
-            if not items:
-                items = [data]
-        items = sorted(items, key=lambda x: x.get("session_key", ""), reverse=True)
+        try:
+            v = str(value).strip()
+        except Exception:
+            return "#CCCCCC"
+        if v.startswith("#") and len(v) == 7:
+            return v
+        # accetta valori senza '#', es. '3671C6'
+        if len(v) == 6 and all(c in "0123456789abcdefABCDEF" for c in v):
+            return f"#{v.lower()}"
+        return "#CCCCCC"
 
-        # colonne da mostrare: escludiamo alcune chiavi non rilevanti per la tabella
-        exclude = {"meeting_key", "session_key", "broadcast_name", "team_colour", "country_code", "first_name", "last_name"}
-        cols = []
-        if items:
-            first = items[0]
-            if isinstance(first, dict):
-                cols = [c for c in list(first.keys()) if c not in exclude]
+    app.jinja_env.filters["safe_color"] = safe_color
 
-        return render_template("drivers.html", items=items, cols=cols)
-
-
-    @app.route("/drivers/<driver_number>", methods=["GET"])
-    def driver_detail(driver_number: str):
-        data = fetch_from_f1open(f"drivers?driver_number={driver_number}")
-        return jsonify(data)
-
-
-    @app.route("/position", methods=["GET"])
-    def position():
-        data = fetch_from_f1open("position")
-        return jsonify(data)
-
-
-    @app.route("/races", methods=["GET"])
-    def races():
-        """Renderizza una pagina HTML con la lista delle gare (o altri dati restituiti dall'API)."""
-        season = request.args.get("season")
-        path = "sessions?session_type=Race"
-        if season:
-            path = f"sessions/{season}"
-        data = fetch_from_f1open(path)
-
-        # Normalizziamo i dati: cerchiamo una lista di elementi da mostrare
-        items = []
-        if isinstance(data, list):
-            items = data
-        elif isinstance(data, dict):
-            # se c'è un errore mostriamolo nella pagina
-            if data.get("error"):
-                return render_template("races.html", error=data.get("error"), items=[])
-            # cerchiamo la prima value che sia una lista (es. {'races': [...]})
-            for v in data.values():
-                if isinstance(v, list):
-                    items = v
-                    break
-            if not items:
-                # fallback: mostriamo il dict come singolo elemento
-                items = [data]
-
-        return render_template("races.html", items=items)
+    # register blueprints
+    app.register_blueprint(main_bp)
+    app.register_blueprint(drivers_bp)
+    app.register_blueprint(races_bp)
 
 
     return app

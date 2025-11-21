@@ -1,53 +1,50 @@
-<!doctype html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Drivers</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+{% block title %}Drivers - F1API{% endblock %}
 
-<body>
+{% block content %}
     <h1>Drivers</h1>
     {% if error %}
-    <div style="color:red;">Error: {{ error }}</div>
+        <div style="color:red;">Error: {{ error }}</div>
     {% endif %}
 
     {% if items and items|length > 0 %}
-    <table>
-        <thead>
-            <tr>
-                {% for col in cols %}
-                <th>{{ col }}</th>
+        <table>
+            <thead>
+                <tr>
+                    {% for col in cols %}
+                    {% if col != "team_colour" %}
+                    <th>{{ col }}</th>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    {% set row_color = item.get('team_colour')|safe_color if item.get('team_colour') else "" %}
+                    {% if (item.get('headshot_url') or item.get('last_name') == "Colapinto") %}
+                        {% if item.get('full_name') and item.get('first_name') and item.get('full_name').split(' ')[0] == item.get('first_name') %}
+                            <tr {% if row_color %}style="background: linear-gradient(var(--card) 90%, {{ row_color }})"{% endif %}>
+                                {% for col in cols %}
+                                    {% if col == "driver_number" %}
+                                        <td><a href="/drivers/{{ item.get(col) }}" {% if row_color %}style="color: {{row_color}};"{% endif %}>{{ item.get(col) }}</a></td>
+                                    {% else %}
+                                        {% if col != "team_colour" %}
+                                            {% if col == "headshot_url" %}
+                                                <td><img class="headshot" src="{{ item.get(col) }}" alt="Headshot" width="93"></td>
+                                            {% else %}
+                                                <td>{{ item.get(col) }}</td>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endif %}
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% set driver_list = []%}
-            {% for item in items %}
-            {% if item.get('broadcast_name') not in driver_list %}
-            {% if item.get('headshot_url') %}
-            {% if item.get('full_name').split(' ')[0] == item.get('first_name') %}
-            <tr>
-                {% for col in cols %}
-                {% if col == "headshot_url" %}
-                <td><img class="headshot" src="{{ item.get(col) }}" alt="Headshot"></td>
-                {% else %}
-                <td>{{ item.get(col) }}</td>
-                {% endif %}
-                {% endfor %}
-            </tr>
-            {% set driver_list = driver_list + [item.get('broadcast_name')] %}
-            {% endif %}
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     {% else %}
-    <p>No items to display.</p>
+        <p>No items to display.</p>
     {% endif %}
-</body>
-
-</html>
+{% endblock %}
