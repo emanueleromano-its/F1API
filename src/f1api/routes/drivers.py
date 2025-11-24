@@ -54,8 +54,3 @@ def drivers():
     unique_items = sorted(unique_items, key=lambda x: x.get("driver_number", ""))
     return render_template("drivers.html", items=unique_items, cols=cols, col_tradotto=col_tradotto)
 
-
-@drivers_bp.route("/drivers/<driver_number>", methods=["GET"])
-def driver_detail(driver_number: str):
-    data = fetch_from_f1open(f"drivers?driver_number={driver_number}")
-    return jsonify(data)

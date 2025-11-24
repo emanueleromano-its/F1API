@@ -27,7 +27,7 @@
                             <tr {% if row_color %}style="background: linear-gradient(var(--card) 90%, {{ row_color }})"{% endif %}>
                                 {% for col in cols %}
                                     {% if col == "driver_number" %}
-                                        <td><a href="/drivers/{{ item.get(col) }}" {% if row_color %}style="color: {{row_color}};"{% endif %}>{{ item.get(col) }}</a></td>
+                                        <td><a href="/driver/{{ item.get(col) }}" {% if row_color %}style="color: {{row_color}};"{% endif %}>{{ item.get(col) }}</a></td>
                                     {% else %}
                                         {% if col != "team_colour" %}
                                             {% if col == "headshot_url" %}

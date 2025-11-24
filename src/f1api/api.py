@@ -40,7 +40,7 @@ def fetch_from_f1open(
     """
     url = f"{F1OPEN_API_BASE.rstrip('/')}/{path.lstrip('/')}"
     cache = get_cache_repo()
-    
+    print (f"Fetching URL: {url} with params: {params} (force_refresh={force_refresh})")
     # 1. Controlla cache (se non force_refresh)
     if not force_refresh:
         cached = cache.get(url, params)

@@ -16,6 +16,7 @@ from flask import Flask
 from f1api.routes.drivers import drivers_bp
 from f1api.routes.races import races_bp
 from f1api.routes.main import main_bp
+from f1api.routes.driver import driver_bp
 from f1api.api import F1OPEN_API_BASE
 
 
@@ -50,6 +51,8 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     app.register_blueprint(main_bp)
     app.register_blueprint(drivers_bp)
     app.register_blueprint(races_bp)
+    # blueprint con route /driver/<driver_number> (alias singolare)
+    app.register_blueprint(driver_bp)
 
 
     return app

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Driver Detail - {{ driver.full_name if driver else 'Driver #' + driver_number }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .driver-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 24px;
+            background: var(--card);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .driver-header img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .driver-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+        }
+
+        .driver-info .meta {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .driver-info .meta span {
+            margin-right: 16px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .filters label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-right: 8px;
+        }
+
+        .filters select {
+            padding: 8px 12px;
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filters button {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .filters button:hover {
+            background: #c70500;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: var(--text);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 8px;
+        }
+
+        .no-data {
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+            background: var(--card);
+            border-radius: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 720px) {
+            .driver-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters select,
+            .filters button {
+                width: 100%;
+            }
+        }
+
+        /* Highlight row styles */
+        tbody tr.fastest-lap {
+            background: linear-gradient(90deg, rgba(139, 0, 255, 0.1), rgba(255, 255, 255, 0.01));
+        }
+
+        tbody tr.pit-stop {
+            background: linear-gradient(90deg, rgba(255, 165, 0, 0.1), rgba(255, 255, 255, 0.01));
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header pilota -->
+        <div class="driver-header">
+            {% if driver %}
+            <img class="headshot" src="{{ driver.headshot_url }}" alt="{{ driver.full_name }}">
+            <div class="driver-info">
+                <h1>{{ driver.full_name }}</h1>
+                <div class="meta">
+                    <span><strong>#{{ driver.driver_number }}</strong></span>
+                    <span>{{ driver.team_name }}</span>
+                    <span>{{ driver.name_acronym }}</span>
+                    {% if driver.team_colour %}
+                    {% set safe_colour = driver.team_colour|safe_color %}
+                    <span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{{ safe_colour }};"></span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="driver-info">
+                <h1>Driver #{{ driver_number }}</h1>
+                <div class="meta">
+                    <span class="badge">No driver info available</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Filtri Meeting & Session -->
+        <form class="filters" method="GET" action="{{ url_for('driver.driver_detail', driver_number=driver_number) }}">
+            <label for="meeting_key">Race Week:</label>
+            <select name="meeting_key" id="meeting_key">
+                <option value="latest" {% if current_meeting=='latest' %}selected{% endif %}>Latest</option>
+                {% for meeting in meetings %}
+                <option value="{{ meeting.meeting_key }}" {% if current_meeting==meeting.meeting_key|string %}selected{% endif %}>
+                    {{ meeting.meeting_name }} ({{ meeting.year }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="session_key">Session:</label>
+            <select name="session_key" id="session_key">
+                <option value="latest" {% if current_session=='latest' %}selected{% endif %}>Latest</option>
+                {% for session in sessions %}
+                <option value="{{ session.session_key }}" {% if current_session==session.session_key|string %}selected{% endif %}>
+                    {{ session.session_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Apply Filters</button>
+        </form>
+
+        <!-- Sezione: Risultati Sessione -->
+        <div class="section">
+            <h2>Session Results</h2>
+            {% if session_results and session_results|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Points</th>
+                        <th>Status</th>
+                        <th>N° of laps</th>
+                        <th>Session Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in session_results %}
+                    <tr>
+                        <td><strong>{{ result.position if result.position else 'DNF' if result.dnf else 'DNS' if result.dns else 'DSQ' if result.dsq else 'N/A' }}</strong></td>
+                        <td>{{ result.points if result.points else '0' }}</td>
+                        <td>{{ result.status if result.status else 'N/A' }}</td>
+                        <td>{{ result.number_of_laps if result.number_of_laps else 'N/A' }}</td>
+                        <td>{{ session_map.get(result.session_key) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">No session results available for this driver/meeting.</div>
+            {% endif %}
+        </div>
+
+        <!-- Sezione: Lap Times -->
+        <div class="section">
+            <h2>Lap Times</h2>
+            {% if laps and laps|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lap</th>
+                        <th>Lap Time</th>
+                        <th>Segment 1</th>
+                        <th>Segment 2</th>
+                        <th>Segment 3</th>
+                        <th>Speed (km/h)</th>
+                        <th>Compound</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lap in laps %}
+                    <tr {% if lap.is_pit_out_lap %}class="pit-stop" {% endif %}>
+                        <td><strong>{{ lap.lap_number }}</strong></td>
+                        <td>{{ lap.lap_duration if lap.lap_duration else 'N/A' }}</td>
+                        <td>{{ "%.3f"|format(lap.duration_sector_1) if lap.duration_sector_1 else 'N/A' }}</td>
+                        <td>{{ "%.3f"|format(lap.duration_sector_2) if lap.duration_sector_2 else 'N/A' }}</td>
+                        <td>{{ "%.3f"|format(lap.duration_sector_3) if lap.duration_sector_3 else 'N/A' }}</td>
+                        <td>{{ "%.1f"|format(lap.st_speed) if lap.st_speed else 'N/A' }}</td>
+                        {% set compound = lap.tyre_compound if lap.tyre_compound else (lap_compound_map.get(lap.lap_number) if lap_compound_map else None) %}
+                        <td>
+                            {% if compound %}
+                            <span class="compound-badge compound-{{ compound|lower|replace(' ', '-') }}">{{ compound }}</span>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">No lap data available for this session.</div>
+            {% endif %}
+        </div>
+
+        <!-- Sezione: Pit Stops -->
+        <div class="section">
+            <h2>Pit Stops</h2>
+            {% if pit_stops and pit_stops|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pit #</th>
+                        <th>Lap</th>
+                        <th>Date</th>
+                        <th>Duration (s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pit in pit_stops %}
+                    <tr>
+                        <td><strong>{{ loop.index }}</strong></td>
+                        <td>{{ pit.lap_number if pit.lap_number else 'N/A' }}</td>
+                        <td>{{ pit.date if pit.date else 'N/A' }}</td>
+                        <td>{{ "%.2f"|format(pit.pit_duration) if pit.pit_duration else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">No pit stop data available for this session.</div>
+            {% endif %}
+        </div>
+
+        <!-- Link back -->
+        <div style="margin-top:32px;">
+            <a href="{{ url_for('drivers.drivers') }}" style="color:var(--accent);">← Back to Drivers List</a>
+        </div>
+    </div>
+</body>
+
+</html>

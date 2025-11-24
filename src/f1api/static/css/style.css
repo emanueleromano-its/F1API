@@ -132,3 +132,20 @@ img.headshot{border-radius:6px; display:block}
   th, td{padding:8px}
   .site-title{font-size:18px}
 }
+
+/* Tyre compound badges */
+.compound-badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:12px;
+  color:var(--card);
+}
+
+.compound-soft{ background: linear-gradient(90deg,#ff5c5c,#ff2b2b); color: #1b1b1b; }
+.compound-medium{ background: linear-gradient(90deg,#ffd24d,#ffc107); color: #1b1b1b; }
+.compound-hard{ background: linear-gradient(90deg,#ffffff,#e6e6e6); color: #0b0b0d; }
+.compound-intermediate{ background: linear-gradient(90deg,#66cc66,#33aa33); color: #0b0b0d; }
+.compound-wet{ background: linear-gradient(90deg,#6fb3ff,#1e90ff); color: #0b0b0d; }
+.compound-unknown{ background: rgba(255,255,255,0.04); color: var(--muted); }
