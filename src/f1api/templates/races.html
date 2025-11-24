@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Races - F1API{% endblock %}
+{% block title %}Gare - F1API{% endblock %}
 
 {% block content %}
-  <h1>Races</h1>
+  <h1>Gare</h1>
   {% if error %}
     <div style="color:red;">Error: {{ error }}</div>
   {% endif %}
@@ -14,20 +14,31 @@
       <thead>
         <tr>
           {% for col in cols %}
-            {% if col != "session_type" %}
-                <th>{{ col }}</th>
+            {% if col != "session_type" and col != "meeting_key" %}
+                <th>{{ col_tradotto.get(col, col) }}</th>
             {% endif %}
           {% endfor %}
+          <th>Immagine circuito</th>
         </tr>
       </thead>
       <tbody>
         {% for item in items %}
           <tr>
             {% for col in cols %}
-              {% if col != "session_type" %}
-                <td>{{ item.get(col) }}</td>
+              {% if col != "session_type" and col != "meeting_key" %}
+                <td>
+                  {% if col == "location" %}
+                  <a href="/race/{{ item.get('circuit_short_name') }}" target="_blank">{{ item.get(col) }}</a>
+                  {% else %}
+                  {{ item.get(col) }}
+                  {% if col == "country_name" %}
+                  {{ country_flags[item.get(col)]|safe }}
+                  {% endif %}
+                  {% endif %}
+                </td>  
               {% endif %}
             {% endfor %}
+            <td><img src="https://media.formula1.com/image/upload/c_fit,h_704/q_auto/v1740000000/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/{{circuit_urls.get(item.get('circuit_short_name'))}}_Circuit.webp" alt="Circuit Image" width="200"></td>
           </tr>
         {% endfor %}
       </tbody>

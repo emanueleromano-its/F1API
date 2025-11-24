@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Drivers - F1API{% endblock %}
+{% block title %}Piloti - F1API{% endblock %}
 
 {% block content %}
-    <h1>Drivers</h1>
+    <h1>Piloti</h1>
     {% if error %}
         <div style="color:red;">Error: {{ error }}</div>
     {% endif %}
@@ -14,7 +14,7 @@
                 <tr>
                     {% for col in cols %}
                     {% if col != "team_colour" %}
-                    <th>{{ col }}</th>
+                    <th>{{ col_tradotto[col] }}</th>
                     {% endif %}
                     {% endfor %}
                 </tr>
