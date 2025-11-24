@@ -1,11 +1,5 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Driver Detail - {{ driver.full_name if driver else 'Driver #' + driver_number }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% extends "base.html" %}
+{% block extra_head %}
     <style>
         .driver-header {
             display: flex;
@@ -123,9 +117,64 @@
         tbody tr.pit-stop {
             background: linear-gradient(90deg, rgba(255, 165, 0, 0.1), rgba(255, 255, 255, 0.01));
         }
-    </style>
-</head>
 
+        /* Meeting info card */
+        .meeting-info {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            background: var(--card);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+
+        .meeting-info img {
+            width: 300px;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .meeting-details {
+            flex: 1;
+        }
+
+        .meeting-details h2 {
+            margin: 0 0 16px 0;
+            font-size: 22px;
+            color: var(--text);
+        }
+
+        .meeting-details .info-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .meeting-details .info-row .label {
+            color: var(--muted);
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .meeting-details .info-row .value {
+            color: var(--text);
+        }
+
+        @media (max-width: 720px) {
+            .meeting-info {
+                flex-direction: column;
+            }
+
+            .meeting-info img {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
 <body>
     <div class="container">
         <!-- Header pilota -->
@@ -178,6 +227,39 @@
 
             <button type="submit">Apply Filters</button>
         </form>
+
+        <!-- Sezione: Meeting Info -->
+        {% if meeting_info %}
+        <div class="meeting-info">
+            {% if meeting_info.circuit_image_url %}
+            <img src="{{ meeting_info.circuit_image_url }}" alt="{{ meeting_info.circuit_short_name }} Circuit">
+            {% endif %}
+            <div class="meeting-details">
+                <h2>{{ meeting_info.meeting_name or 'Meeting Info' }}</h2>
+                <div class="info-row">
+                    <span class="label">Location:</span>
+                    <span class="value">{{ meeting_info.location or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Date Start:</span>
+                    <span class="value">{{ meeting_info.date_start_formatted or meeting_info.date_start or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Country:</span>
+                    <span class="value">
+                        {{ meeting_info.country_name or 'N/A' }}
+                        {% if meeting_info.country_name and country_flags.get(meeting_info.country_name) %}
+                        {{ country_flags[meeting_info.country_name]|safe }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Circuit:</span>
+                    <span class="value">{{ meeting_info.circuit_short_name or 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Sezione: Risultati Sessione -->
         <div class="section">
@@ -270,7 +352,7 @@
                     <tr>
                         <td><strong>{{ loop.index }}</strong></td>
                         <td>{{ pit.lap_number if pit.lap_number else 'N/A' }}</td>
-                        <td>{{ pit.date if pit.date else 'N/A' }}</td>
+                        <td>{{ pit.date.strftime('%d/%m/%Y %H:%M:%S') if pit.date else 'N/A' }}</td>
                         <td>{{ "%.2f"|format(pit.pit_duration) if pit.pit_duration else 'N/A' }}</td>
                     </tr>
                     {% endfor %}
@@ -289,3 +371,4 @@
 </body>
 
 </html>
+{% endblock %}

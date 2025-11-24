@@ -45,6 +45,7 @@ def fetch_from_f1open(
     if not force_refresh:
         cached = cache.get(url, params)
         if cached:
+            print(f"Using cached data for URL: {url} with params: {params}")
             return cached["body"]
     
     # 2. Prepara headers con ETag per conditional request

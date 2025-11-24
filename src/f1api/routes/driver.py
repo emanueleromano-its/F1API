@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from flask import Blueprint, request, render_template, jsonify
 
 from f1api.api import fetch_from_f1open
+from f1api.utils import format_datetime, get_country_flags, get_circuit_image_url
 
 driver_bp = Blueprint("driver", __name__)
 
@@ -54,10 +55,10 @@ def driver_detail(driver_number: str):
         )
         if isinstance(stints_data, list):
             for stint in stints_data:
-                compound = stint.get("tyre_compound") or stint.get("compound")
+                compound = stint.get("compound")
                 # start_lap / end_lap may be strings or ints
-                start = stint.get("start_lap") or stint.get("startLap") or stint.get("start")
-                end = stint.get("end_lap") or stint.get("endLap") or stint.get("end")
+                start = stint.get("lap_start")
+                end = stint.get("lap_end")
                 if compound and start is not None and end is not None:
                     try:
                         start_i = int(start)
@@ -79,10 +80,24 @@ def driver_detail(driver_number: str):
         f"pit?driver_number={driver_number}&session_key={session_key}"
     )
     pit_stops = pit_data if isinstance(pit_data, list) else []
+    # Convert pit stop date strings to datetime objects for better formatting in template
+    from datetime import datetime
+    for pit in pit_stops:
+        date_str = pit.get("date")
+        if date_str:
+            try:
+                pit["date"] = datetime.fromisoformat(date_str)
+            except Exception:
+                try:
+                    pit["date"] = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+                except Exception:
+                    pit["date"] = None
+        else:
+            pit["date"] = None
     
     # 5. Fetch available meetings per dropdown (ultimi 5)
-    meetings_data = fetch_from_f1open("meetings?year=2024")
-    meetings = meetings_data[-5:] if isinstance(meetings_data, list) else []
+    meetings_data = fetch_from_f1open("meetings")
+    meetings = meetings_data if isinstance(meetings_data, list) else []
     
     # 6. Fetch available sessions per dropdown (per il meeting corrente)
     sessions_data = fetch_from_f1open(f"sessions?meeting_key={meeting_key}")
@@ -98,6 +113,19 @@ def driver_detail(driver_number: str):
         except Exception:
             continue
     
+    # 7. Fetch meeting info for display
+    meeting_info = None
+    if meeting_key and meeting_key != "latest":
+        meeting_data = fetch_from_f1open(f"meetings?meeting_key={meeting_key}")
+        if isinstance(meeting_data, list) and len(meeting_data) > 0:
+            meeting_info = meeting_data[0]
+            # Format date_start
+            if meeting_info.get("date_start"):
+                meeting_info["date_start_formatted"] = format_datetime(meeting_info["date_start"])
+            # Get circuit image URL
+            circuit_short = meeting_info.get("circuit_short_name")
+            meeting_info["circuit_image_url"] = get_circuit_image_url(circuit_short)
+    
     return render_template(
         "driver-detail.html",
         driver=driver_info,
@@ -110,5 +138,7 @@ def driver_detail(driver_number: str):
         sessions=sessions,
         current_meeting=meeting_key,
         current_session=session_key,
-        session_map=session_map
+        session_map=session_map,
+        meeting_info=meeting_info,
+        country_flags=get_country_flags()
     )

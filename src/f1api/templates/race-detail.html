@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}{{ meeting_info.meeting_name if meeting_info else 'Race' }} - F1API{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Meeting header card */
+    .race-header {
+        display: flex;
+        gap: 24px;
+        padding: 24px;
+        background: var(--card);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        align-items: center;
+    }
+
+    .race-header img {
+        width: 400px;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .race-info {
+        flex: 1;
+    }
+
+    .race-info h1 {
+        margin: 0 0 16px 0;
+        font-size: 32px;
+        color: var(--text);
+    }
+
+    .race-info .info-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .race-info .info-row .label {
+        color: var(--muted);
+        font-weight: 600;
+        min-width: 140px;
+    }
+
+    .race-info .info-row .value {
+        color: var(--text);
+    }
+
+    /* Meeting selector */
+    .meeting-selector {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 16px 24px;
+        background: var(--surface);
+        border-radius: 8px;
+        margin-bottom: 24px;
+    }
+
+    .meeting-selector label {
+        font-size: 14px;
+        color: var(--muted);
+        margin-right: 8px;
+    }
+
+    .meeting-selector select {
+        padding: 8px 12px;
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        font-size: 14px;
+        flex: 1;
+    }
+
+    /* Sessions accordion */
+    .sessions-container {
+        margin-top: 32px;
+    }
+
+    .session-item {
+        background: var(--card);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .session-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .session-header:hover {
+        background: linear-gradient(90deg, rgba(225,16,0,0.08), rgba(255,255,255,0.02));
+    }
+
+    .session-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: var(--text);
+    }
+
+    .session-header .session-meta {
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .session-content {
+        padding: 0 24px 24px 24px;
+        display: none;
+    }
+
+    .session-content.active {
+        display: block;
+    }
+
+    /* Classification table (TV-style) */
+    .classification-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .classification-table thead {
+        background: linear-gradient(90deg, rgba(225,16,0,0.15), rgba(255,255,255,0.03));
+    }
+
+    .classification-table th {
+        padding: 12px 16px;
+        text-align: left;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .classification-table th.pos {
+        width: 60px;
+        text-align: center;
+    }
+
+    .classification-table th.driver-num {
+        width: 60px;
+        text-align: center;
+    }
+
+    .classification-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        color: var(--text);
+        font-size: 14px;
+    }
+
+    .classification-table tbody tr {
+        transition: background 0.15s ease;
+    }
+
+    .classification-table tbody tr:hover {
+        background: rgba(225, 16, 0, 0.05);
+    }
+
+    /* Position styling */
+    .classification-table td.pos {
+        text-align: center;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .classification-table tr.p1 td.pos {
+        color: #FFD700;
+    }
+
+    .classification-table tr.p2 td.pos {
+        color: #C0C0C0;
+    }
+
+    .classification-table tr.p3 td.pos {
+        color: #CD7F32;
+    }
+
+    /* Driver number circle */
+    .driver-num-circle {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    /* Driver name bold */
+    .driver-name {
+        font-weight: 600;
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.finished {
+        background: rgba(0, 255, 0, 0.1);
+        color: #00ff00;
+    }
+
+    .status-badge.dnf {
+        background: rgba(255, 0, 0, 0.1);
+        color: #ff4444;
+    }
+
+    .status-badge.dns,
+    .status-badge.dsq {
+        background: rgba(255, 165, 0, 0.1);
+        color: #ffa500;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+        .race-header {
+            flex-direction: column;
+        }
+
+        .race-header img {
+            width: 100%;
+        }
+
+        .classification-table {
+            font-size: 12px;
+        }
+
+        .classification-table th,
+        .classification-table td {
+            padding: 8px 10px;
+        }
+    }
+
+    /* Toggle icon for accordion */
+    .session-header::after {
+        content: '▼';
+        font-size: 12px;
+        color: var(--muted);
+        transition: transform 0.3s ease;
+    }
+
+    .session-header.active::after {
+        transform: rotate(180deg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Meeting selector -->
+    <div class="meeting-selector">
+        <label for="meeting_selector">Select Meeting:</label>
+        <select id="meeting_selector" onchange="window.location.href='/race/' + this.value;">
+            <option value="latest" {% if meeting_key=='latest' %}selected{% endif %}>Latest</option>
+            {% for meeting in meetings %}
+            <option value="{{ meeting.meeting_key }}" {% if meeting_key==meeting.meeting_key|string %}selected{% endif %}>
+                {{ meeting.meeting_name }} ({{ meeting.year }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Meeting info header -->
+    {% if meeting_info %}
+    <div class="race-header">
+        {% if meeting_info.circuit_image_url %}
+        <img src="{{ meeting_info.circuit_image_url }}" alt="{{ meeting_info.circuit_short_name }} Circuit">
+        {% endif %}
+        <div class="race-info">
+            <h1>{{ meeting_info.meeting_name or 'Race Meeting' }}</h1>
+            <div class="info-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ meeting_info.location or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date Start:</span>
+                <span class="value">{{ meeting_info.date_start_formatted or meeting_info.date_start or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Country:</span>
+                <span class="value">
+                    {{ meeting_info.country_name or 'N/A' }}
+                    {% if meeting_info.country_name and country_flags.get(meeting_info.country_name) %}
+                    {{ country_flags[meeting_info.country_name]|safe }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Circuit:</span>
+                <span class="value">{{ meeting_info.circuit_short_name or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Year:</span>
+                <span class="value">{{ meeting_info.year or 'N/A' }}</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="race-header">
+        <div class="race-info">
+            <h1>Meeting Not Found</h1>
+            <p style="color:var(--muted);">No meeting information available for key: {{ meeting_key }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Sessions accordion -->
+    <div class="sessions-container">
+        <h2 style="margin-bottom: 24px; color: var(--text);">Session Classifications</h2>
+
+        {% if sessions and sessions|length > 0 %}
+        {% for session in sessions %}
+        {% set session_key = session.session_key %}
+        {% set session_data = session_results_map.get(session_key) %}
+        {% if session_data %}
+        <div class="session-item">
+            <div class="session-header" onclick="toggleSession(this)">
+                <div>
+                    <h2>{{ session_data.session_name }}</h2>
+                    <span class="session-meta">{{ session_data.date_start or 'Date N/A' }}</span>
+                </div>
+            </div>
+            <div class="session-content">
+                {% if session_data.results and session_data.results|length > 0 %}
+                <table class="classification-table">
+                    <thead>
+                        <tr>
+                            <th class="pos">Pos</th>
+                            <th class="driver-num">No.</th>
+                            <th>Driver</th>
+                            <th>Team</th>
+                            <th>Gap to Leader</th>
+                            {% if session_data.session_type == "Race" or session_data.session_type == "Sprint" %}
+                            <th>Points</th>
+                            {% endif %}
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in session_data.results %}
+                        <tr class="{% if result.position == 1 %}p1{% elif result.position == 2 %}p2{% elif result.position == 3 %}p3{% endif %}">
+                            <td class="pos">{{ result.display_position }}</td>
+                            <td class="driver-num">
+                                <span class="driver-num-circle">{{ result.driver_number or 'N/A' }}</span>
+                            </td>
+                            <td class="driver-name">{{ result.full_name or result.name_acronym or 'N/A' }}</td>
+                            <td>{{ result.team_name or 'N/A' }}</td>
+                            <td>{{ result.gap_to_leader or '-' }}</td>    
+                            {% if session_data.session_type == "Race" or session_data.session_type == "Sprint" %}
+                            <td>{{ result.points if result.points else '0' }}</td>
+                            {% endif %}
+
+                            <td>
+                                {% if result.status_display == 'Finished' %}
+                                <span class="status-badge finished">{{ result.status_display }}</span>
+                                {% elif 'DNF' in result.status_display %}
+                                <span class="status-badge dnf">{{ result.status_display }}</span>
+                                {% elif 'DNS' in result.status_display or 'DSQ' in result.status_display %}
+                                <span class="status-badge dns">{{ result.status_display }}</span>
+                                {% else %}
+                                <span class="status-badge">{{ result.status_display }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div style="padding: 24px; text-align: center; color: var(--muted);">
+                    No classification data available for this session.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <div style="padding: 24px; text-align: center; color: var(--muted); background: var(--card); border-radius: 8px;">
+            No sessions available for this meeting.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Link back -->
+    <div style="margin-top: 32px;">
+        <a href="{{ url_for('races.races') }}" style="color:var(--accent);">← Back to Races List</a>
+    </div>
+</div>
+
+<script>
+    function toggleSession(header) {
+        const content = header.nextElementSibling;
+        const isActive = content.classList.contains('active');
+        
+        // Close all sessions
+        document.querySelectorAll('.session-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll('.session-header').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Open clicked session if it wasn't active
+        if (!isActive) {
+            content.classList.add('active');
+            header.classList.add('active');
+        }
+    }
+
+    // Open first session by default
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstHeader = document.querySelector('.session-header');
+        if (firstHeader) {
+            toggleSession(firstHeader);
+        }
+    });
+</script>
+{% endblock %}

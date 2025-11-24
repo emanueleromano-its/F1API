@@ -28,7 +28,7 @@
               {% if col != "session_type" and col != "meeting_key" %}
                 <td>
                   {% if col == "location" %}
-                  <a href="/race/{{ item.get('circuit_short_name') }}" target="_blank">{{ item.get(col) }}</a>
+                  <a href="/race/{{ item.get('meeting_key') }}" target="_blank">{{ item.get(col) }}</a>
                   {% else %}
                   {{ item.get(col) }}
                   {% if col == "country_name" %}
