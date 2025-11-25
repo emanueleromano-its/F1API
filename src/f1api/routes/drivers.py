@@ -5,11 +5,13 @@ from typing import Any, Dict, Optional
 from flask import Blueprint, request, render_template, jsonify
 
 from f1api.api import fetch_from_f1open
+from f1api.auth_decorators import login_required
 
 drivers_bp = Blueprint("drivers", __name__)
 
 
 @drivers_bp.route("/drivers", methods=["GET"])
+@login_required
 def drivers():
     q = request.args.get("search")
     params = {"search": q} if q else {}

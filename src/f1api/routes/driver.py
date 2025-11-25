@@ -5,12 +5,14 @@ from typing import Any, Dict, Optional
 from flask import Blueprint, request, render_template, jsonify
 
 from f1api.api import fetch_from_f1open
+from f1api.auth_decorators import login_required
 from f1api.utils import format_datetime, get_country_flags, get_circuit_image_url
 
 driver_bp = Blueprint("driver", __name__)
 
 
 @driver_bp.route("/driver/<driver_number>", methods=["GET"])
+@login_required
 def driver_detail(driver_number: str):
     """Pagina dettaglio pilota con info, risultati, laps e pit stops.
     

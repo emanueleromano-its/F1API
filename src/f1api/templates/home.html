@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - F1API{% endblock %}
+
+{% block extra_head %}
+<style>
+    .hero {
+        text-align: center;
+        padding: 80px 20px;
+        background: linear-gradient(135deg, var(--surface), var(--card));
+        border-radius: 16px;
+        margin: 40px 0;
+    }
+
+    .hero h1 {
+        font-size: 48px;
+        margin: 0 0 16px 0;
+        background: linear-gradient(90deg, var(--accent), #ff4d4d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero p {
+        font-size: 18px;
+        color: var(--muted);
+        margin: 0 0 32px 0;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 16px;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #c70500;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(225, 6, 0, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+        background: var(--surface);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 40px 0;
+    }
+
+    .feature-card {
+        background: var(--card);
+        padding: 32px;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.2s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .feature-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+        font-size: 20px;
+        margin: 0 0 12px 0;
+        color: var(--text);
+    }
+
+    .feature-card p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .welcome-user {
+        background: var(--card);
+        padding: 24px;
+        border-radius: 12px;
+        margin: 24px 0;
+        border-left: 4px solid var(--accent);
+    }
+
+    .welcome-user h2 {
+        margin: 0 0 8px 0;
+        font-size: 24px;
+    }
+
+    .welcome-user p {
+        color: var(--muted);
+        margin: 0;
+    }
+
+    @media (max-width: 720px) {
+        .hero h1 {
+            font-size: 32px;
+        }
+
+        .hero p {
+            font-size: 16px;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🏎️ F1 API Dashboard</h1>
+    <p>Access real-time Formula 1 data, driver statistics, team information, and race results</p>
+    
+    {% if user %}
+    <div class="welcome-user">
+        <h2>Welcome back, {{ user.username }}! 👋</h2>
+        <p>You're logged in and ready to explore F1 data</p>
+    </div>
+    <div class="hero-buttons">
+        <a href="/drivers" class="btn btn-primary">View Drivers</a>
+        <a href="/teams" class="btn btn-secondary">View Teams</a>
+        <a href="/races" class="btn btn-secondary">View Races</a>
+        <a href="/auth/profile" class="btn btn-secondary">My Profile</a>
+    </div>
+    {% else %}
+    <div class="hero-buttons">
+        <a href="/auth/register" class="btn btn-primary">Get Started</a>
+        <a href="/auth/login" class="btn btn-secondary">Login</a>
+        <a href="/drivers" class="btn btn-secondary">Browse Data</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🏁</div>
+        <h3>Live Race Data</h3>
+        <p>Access real-time race information, session results, and championship standings</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Driver Statistics</h3>
+        <p>Detailed driver profiles with lap times, pit stops, and performance analytics</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Team Information</h3>
+        <p>Complete team rosters, car specifications, and constructor standings</p>
+    </div>
+</div>
+
+<div style="text-align: center; margin: 48px 0; color: var(--muted); font-size: 14px;">
+    <p>Powered by OpenF1 API • Data updated in real-time • Persistent caching enabled</p>
+</div>
+{% endblock %}

@@ -148,4 +148,48 @@ img.headshot{border-radius:6px; display:block}
 .compound-hard{ background: linear-gradient(90deg,#ffffff,#e6e6e6); color: #0b0b0d; }
 .compound-intermediate{ background: linear-gradient(90deg,#66cc66,#33aa33); color: #0b0b0d; }
 .compound-wet{ background: linear-gradient(90deg,#6fb3ff,#1e90ff); color: #0b0b0d; }
+
+/* Flash messages */
+.flash-messages{
+  margin: 16px auto;
+  max-width: 800px;
+}
+
+.flash{
+  padding: 12px 20px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 14px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flash-success{
+  background: rgba(40, 167, 69, 0.15);
+  border-color: #28a745;
+  color: #5fd97a;
+}
+
+.flash-danger{
+  background: rgba(220, 53, 69, 0.15);
+  border-color: #dc3545;
+  color: #ff6b7a;
+}
+
+.flash-warning{
+  background: rgba(255, 193, 7, 0.15);
+  border-color: #ffc107;
+  color: #ffd454;
+}
+
+.flash-info{
+  background: rgba(23, 162, 184, 0.15);
+  border-color: #17a2b8;
+  color: #5dccde;
+}
 .compound-unknown{ background: rgba(255,255,255,0.04); color: var(--muted); }

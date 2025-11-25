@@ -5,12 +5,14 @@ from typing import Any, Dict, Optional
 from flask import Blueprint, request, render_template
 
 from f1api.api import fetch_from_f1open
+from f1api.auth_decorators import login_required
 from f1api.utils import format_datetime, get_country_flags, get_circuit_urls
 
 races_bp = Blueprint("races", __name__)
 
 
 @races_bp.route("/races", methods=["GET"])
+@login_required
 def races():
     season = request.args.get("season")
     path = "sessions?session_type=Race"

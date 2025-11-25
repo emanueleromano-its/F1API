@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block extra_head %}
+    <style>
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
+            padding: 24px 0;
+        }
+
+        .team-card {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .team-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--surface), var(--card));
+            border-bottom: 3px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-car-bg {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: auto;
+            opacity: 0.15;
+            filter: grayscale(0.3);
+            pointer-events: none;
+        }
+
+        .team-color-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .team-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .team-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+            flex: 1;
+        }
+
+        .drivers-list {
+            padding: 20px;
+        }
+
+        .driver-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: var(--surface);
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .driver-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .driver-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .driver-headshot {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .driver-info {
+            flex: 1;
+        }
+
+        .driver-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 4px 0;
+        }
+
+        .driver-meta {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .driver-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 32px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            margin: 0 0 12px 0;
+            background: linear-gradient(90deg, var(--accent), #ff4d4d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .no-data {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--muted);
+            background: var(--card);
+            border-radius: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 720px) {
+            .teams-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .driver-item {
+                flex-wrap: wrap;
+            }
+
+            .driver-number {
+                order: -1;
+                width: 100%;
+                text-align: left;
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Formula 1 Teams</h1>
+            <p>Current grid with all drivers and their numbers</p>
+        </div>
+
+        <!-- Teams Grid -->
+        {% if teams and teams|length > 0 %}
+        <div class="teams-grid">
+            {% for team in teams %}
+            <div class="team-card">
+                <div class="team-header" style="border-bottom-color: {{ team.team_colour|safe_color if team.team_colour else 'var(--accent)' }}">
+                    <!-- Team car background -->
+                    {% if team.team_car_url %}
+                    <img class="team-car-bg" src="{{ team.team_car_url }}" alt="{{ team.team_name }} car" loading="lazy">
+                    {% endif %}
+                    
+                    {% if team.team_colour %}
+                    {% set safe_colour = team.team_colour|safe_color %}
+                    <div class="team-color-indicator" style="background: {{ safe_colour }};"></div>
+                    {% endif %}
+                    
+                    <!-- Team logo -->
+                    {% if team.team_logo_url %}
+                    <img class="team-logo" src="{{ team.team_logo_url }}" alt="{{ team.team_name }} logo" loading="lazy">
+                    {% endif %}
+                    
+                    <h2 class="team-name">{{ team.team_name }}</h2>
+                </div>
+
+                <div class="drivers-list">
+                    {% for driver in team.drivers %}
+                    <a href="{{ url_for('driver.driver_detail', driver_number=driver.driver_number) }}" 
+                       class="driver-item" style="text-decoration: none;">
+                        <img class="driver-headshot" 
+                             src="{{ driver.headshot_url }}" 
+                             alt="{{ driver.full_name }}"
+                             onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png/content/'">
+                        <div class="driver-info">
+                            <p class="driver-name">{{ driver.full_name }}</p>
+                            <p class="driver-meta">{{ driver.name_acronym }}</p>
+                        </div>
+                        <div class="driver-number">#{{ driver.driver_number }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>No teams data available at the moment.</p>
+        </div>
+        {% endif %}
+
+        <!-- Link back -->
+        <div style="margin-top: 48px; text-align: center;">
+            <a href="{{ url_for('drivers.drivers') }}" style="color: var(--accent); font-size: 14px;">
+                ← Back to Drivers List
+            </a>
+        </div>
+    </div>
+{% endblock %}

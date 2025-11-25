@@ -104,3 +104,36 @@ def get_circuit_image_url(circuit_short_name: Optional[str]) -> str:
     if not mapped_name:
         return ""
     return f"https://media.formula1.com/image/upload/c_fit,h_704/q_auto/v1740000000/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/{mapped_name}_Circuit.webp"
+
+def get_team_logo_url(team_name: Optional[str]) -> str:
+    """Build F1 team logo image URL from team name.
+    
+    Args:
+        team_name: Name of the team from API (e.g. "Mercedes")
+    
+    Returns:
+        Full URL to team logo image or empty string if not found
+    """
+    if not team_name:
+        return ""
+    formatted_name = team_name.lower().replace(" ", "").replace(".", "").replace("&", "and")
+    print(f"https://media.formula1.com/image/upload/c_fit,h_64/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}logo.webp")
+    if formatted_name == "mercedes" or formatted_name == "astonmartin":
+        return f"https://media.formula1.com/image/upload/c_fit,h_64/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}logolight.webp"
+    else:
+        return f"https://media.formula1.com/image/upload/c_fit,h_64/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}logo.webp"
+
+def get_team_car_url(team_name: Optional[str]) -> str:
+    """Build F1 team car image URL from team name.
+    
+    Args:
+        team_name: Name of the team from API (e.g. "Mercedes")
+    
+    Returns:
+        Full URL to team car image or empty string if not found
+    """
+    if not team_name:
+        return ""
+    formatted_name = team_name.lower().replace(" ", "").replace(".", "").replace("&", "and")
+    print(f"https://media.formula1.com/image/upload/c_lfill,w_3392/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}carright.webp")
+    return f"https://media.formula1.com/image/upload/c_lfill,w_3392/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}carright.webp"

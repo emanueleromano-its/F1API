@@ -182,7 +182,7 @@
             {% if driver %}
             <img class="headshot" src="{{ driver.headshot_url }}" alt="{{ driver.full_name }}">
             <div class="driver-info">
-                <h1>{{ driver.full_name }}</h1>
+                <a href="{{ url_for('driver.driver_detail', driver_number=driver.driver_number) }}"><h1>{{ driver.full_name }}</h1></a>
                 <div class="meta">
                     <span><strong>#{{ driver.driver_number }}</strong></span>
                     <span>{{ driver.team_name }}</span>

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Navigation History - F1API{% endblock %}
+
+{% block extra_head %}
+<style>
+    .history-container {
+        max-width: 1000px;
+        margin: 40px auto;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .history-header h1 {
+        font-size: 32px;
+        margin: 0;
+        background: linear-gradient(90deg, var(--accent), #ff4d4d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .clear-history-btn {
+        padding: 10px 20px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+    }
+
+    .clear-history-btn:hover {
+        background: #c70500;
+        transform: translateY(-2px);
+    }
+
+    .history-stats {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--accent);
+        margin: 0 0 4px 0;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .history-timeline {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 32px;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 20px;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s ease;
+    }
+
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+
+    .timeline-item:hover {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .timeline-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #ff4d4d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 4px 0;
+    }
+
+    .timeline-title a {
+        color: var(--text);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .timeline-title a:hover {
+        color: var(--accent);
+    }
+
+    .timeline-url {
+        font-size: 13px;
+        color: var(--muted);
+        font-family: monospace;
+        margin: 0 0 8px 0;
+    }
+
+    .timeline-date {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .no-history {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--muted);
+    }
+
+    .no-history-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+
+    .no-history h2 {
+        font-size: 24px;
+        margin: 0 0 8px 0;
+        color: var(--text);
+    }
+
+    .no-history p {
+        margin: 0 0 24px 0;
+    }
+
+    .btn-secondary {
+        display: inline-block;
+        padding: 12px 24px;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background: var(--card);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 720px) {
+        .history-container {
+            margin: 20px;
+        }
+
+        .history-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .clear-history-btn {
+            width: 100%;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <h1>📜 Navigation History</h1>
+        {% if history and history|length > 0 %}
+        <form method="POST" action="{{ url_for('main.clear_history') }}" onsubmit="return confirm('Are you sure you want to clear all history?');">
+            <button type="submit" class="clear-history-btn">🗑️ Clear History</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if history and history|length > 0 %}
+    <div class="history-stats">
+        <div class="stat-card">
+            <p class="stat-value">{{ history|length }}</p>
+            <p class="stat-label">Total Visits</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ history|map(attribute='page_url')|unique|list|length }}</p>
+            <p class="stat-label">Unique Pages</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ history[0].visited_at[:10] if history else 'N/A' }}</p>
+            <p class="stat-label">Last Visit</p>
+        </div>
+    </div>
+
+    <div class="history-timeline">
+        {% for record in history %}
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                {% if 'driver' in record.page_url.lower() %}
+                    👤
+                {% elif 'team' in record.page_url.lower() %}
+                    🏆
+                {% elif 'race' in record.page_url.lower() %}
+                    🏁
+                {% elif record.page_url == '/' %}
+                    🏠
+                {% elif 'history' in record.page_url.lower() %}
+                    📜
+                {% else %}
+                    📄
+                {% endif %}
+            </div>
+            <div class="timeline-content">
+                <p class="timeline-title">
+                    <a href="{{ record.page_url }}">{{ record.page_title or 'Untitled Page' }}</a>
+                </p>
+                <p class="timeline-url">{{ record.page_url }}</p>
+                <p class="timeline-date">
+                    🕒 {{ record.visited_at[:19].replace('T', ' ') }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-history">
+        <div class="no-history-icon">📭</div>
+        <h2>No History Yet</h2>
+        <p>Start exploring to build your navigation history!</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="/drivers" class="btn-secondary">Browse Drivers</a>
+            <a href="/teams" class="btn-secondary">View Teams</a>
+            <a href="/races" class="btn-secondary">Race Calendar</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
