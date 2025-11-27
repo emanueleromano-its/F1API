@@ -50,7 +50,7 @@ class AuthRepository:
             conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_username ON users(username)")
             conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_email ON users(email)")
             
-            # Create page_history table for tracking navigation
+            # Crea la tabella page_history per tracciare la navigazione
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS page_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,7 +133,7 @@ class AuthRepository:
                 conn.commit()
                 return cursor.lastrowid
         except sqlite3.IntegrityError:
-            # Username or email already exists
+            # Username o email già esistenti
             return None
 
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
@@ -201,10 +201,10 @@ class AuthRepository:
         if not self.verify_password(password, password_hash):
             return None
         
-        # Update last login
+    # Aggiorna l'ultimo login
         self.update_last_login(row["id"])
         
-        # Return user without password_hash
+    # Restituisci l'utente senza password_hash
         return {
             "id": row["id"],
             "username": row["username"],
@@ -335,7 +335,7 @@ class AuthRepository:
             self._local.conn = None
 
 
-# Global instance
+# Istanza globale
 _auth_repo: Optional[AuthRepository] = None
 
 

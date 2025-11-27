@@ -22,7 +22,7 @@ def format_datetime(date_raw: Optional[str], fmt: str = "%d/%m/%Y %H:%M") -> Opt
         return dt.strftime(fmt)
     except Exception:
         try:
-            # fallback if timezone-less ISO
+            # fallback se la stringa ISO non contiene timezone
             dt = datetime.strptime(date_raw, "%Y-%m-%dT%H:%M:%S")
             return dt.strftime(fmt)
         except Exception:

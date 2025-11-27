@@ -10,7 +10,7 @@ from f1api.cache_repository import CacheRepository
 
 F1OPEN_API_BASE = os.getenv("F1OPEN_API_BASE", "https://api.openf1.org/v1")
 
-# Initialize global cache repository
+# Inizializza l'istanza globale del repository della cache
 _cache_repo = None
 
 

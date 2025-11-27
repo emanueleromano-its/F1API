@@ -20,11 +20,11 @@ def driver_detail(driver_number: str):
     - meeting_key: filtro per race week (default: latest)
     - session_key: filtro per sessione (default: latest)
     """
-    # Get filters from query params
+    # Ottieni filtri dai parametri della query
     meeting_key = request.args.get("meeting_key", "latest")
     session_key = request.args.get("session_key", "latest")
     
-    # 1. Fetch driver info (per header)
+    # 1. Recupera le informazioni sul pilota (intestazione)
     driver_data = fetch_from_f1open(f"drivers?driver_number={driver_number}&session_key=latest")
     driver_info = None
     if isinstance(driver_data, list) and len(driver_data) > 0:
@@ -32,24 +32,24 @@ def driver_detail(driver_number: str):
     elif isinstance(driver_data, dict) and not driver_data.get("error"):
         driver_info = driver_data
     
-    # Fallback headshot
+    # Immagine fallback
     if driver_info and not driver_info.get("headshot_url"):
         driver_info["headshot_url"] = "https://media.formula1.com/d_driver_fallback_image.png/content/"
     
-    # 2. Fetch session results
+    # 2. Recupera i risultati della sessione
     session_result_data = fetch_from_f1open(
         f"session_result?driver_number={driver_number}&meeting_key={meeting_key}"
     )
     session_results = session_result_data if isinstance(session_result_data, list) else []
     
-    # 3. Fetch laps
+    # 3. Recupera i tempi dei giri (laps)
     laps_data = fetch_from_f1open(
         f"laps?driver_number={driver_number}&session_key={session_key}"
     )
     laps = laps_data if isinstance(laps_data, list) else []
-    # 3b. Attempt to fetch stints so we can map laps to tyre compounds when
-    # lap-level tyre data (lap.tyre_compound) is missing. Build a simple
-    # lap -> compound map: { lap_number: compound }
+    # 3b. Prova a recuperare i stint per mappare i giri con i compound delle gomme
+    # quando i dati per giro (lap.tyre_compound) non sono disponibili. Costruisce una
+    # mappa lap -> compound: { numero_giro: compound }
     lap_compound_map: Dict[int, str] = {}
     try:
         stints_data = fetch_from_f1open(
@@ -58,7 +58,7 @@ def driver_detail(driver_number: str):
         if isinstance(stints_data, list):
             for stint in stints_data:
                 compound = stint.get("compound")
-                # start_lap / end_lap may be strings or ints
+                # start_lap / end_lap possono essere stringhe o interi
                 start = stint.get("lap_start")
                 end = stint.get("lap_end")
                 if compound and start is not None and end is not None:
@@ -68,21 +68,21 @@ def driver_detail(driver_number: str):
                     except Exception:
                         continue
                     for lap_n in range(start_i, end_i + 1):
-                        # Only set if not already present (earlier stints take precedence)
+                        # Imposta solo se non è già presente (i stint precedenti hanno priorità)
                         if lap_n not in lap_compound_map:
                             lap_compound_map[lap_n] = compound
-                            # also store string key so template lookups succeed if lap numbers are strings
+                            # memorizza anche la chiave come stringa così i template funzionano se i numeri dei giri sono stringhe
                             lap_compound_map[str(lap_n)] = compound
     except Exception:
-        # Don't fail the whole page if stints endpoint is unavailable
+    # Non far fallire l'intera pagina se l'endpoint stints non è disponibile
         lap_compound_map = {}
     
-    # 4. Fetch pit stops
+    # 4. Recupera i pit stop
     pit_data = fetch_from_f1open(
         f"pit?driver_number={driver_number}&session_key={session_key}"
     )
     pit_stops = pit_data if isinstance(pit_data, list) else []
-    # Convert pit stop date strings to datetime objects for better formatting in template
+    # Converte le stringhe di data dei pit stop in oggetti datetime per una migliore formattazione nel template
     from datetime import datetime
     for pit in pit_stops:
         date_str = pit.get("date")
@@ -97,14 +97,14 @@ def driver_detail(driver_number: str):
         else:
             pit["date"] = None
     
-    # 5. Fetch available meetings per dropdown (ultimi 5)
+    # 5. Recupera i meeting disponibili per il dropdown (ultimi 5)
     meetings_data = fetch_from_f1open("meetings")
     meetings = meetings_data if isinstance(meetings_data, list) else []
     
-    # 6. Fetch available sessions per dropdown (per il meeting corrente)
+    # 6. Recupera le sessioni disponibili per il dropdown (per il meeting corrente)
     sessions_data = fetch_from_f1open(f"sessions?meeting_key={meeting_key}")
     sessions = sessions_data if isinstance(sessions_data, list) else []
-    # Build a mapping session_key -> session_name (or session_type) for template lookup
+    # Costruisce una mappa session_key -> session_name (o session_type) per il template
     session_map = {}
     for s in sessions:
         try:
@@ -115,16 +115,16 @@ def driver_detail(driver_number: str):
         except Exception:
             continue
     
-    # 7. Fetch meeting info for display
+    # 7. Recupera le informazioni del meeting per la visualizzazione
     meeting_info = None
     if meeting_key and meeting_key != "latest":
         meeting_data = fetch_from_f1open(f"meetings?meeting_key={meeting_key}")
         if isinstance(meeting_data, list) and len(meeting_data) > 0:
             meeting_info = meeting_data[0]
-            # Format date_start
+            # Formatta date_start
             if meeting_info.get("date_start"):
                 meeting_info["date_start_formatted"] = format_datetime(meeting_info["date_start"])
-            # Get circuit image URL
+            # Ottieni l'URL dell'immagine del circuito
             circuit_short = meeting_info.get("circuit_short_name")
             meeting_info["circuit_image_url"] = get_circuit_image_url(circuit_short)
     

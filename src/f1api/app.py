@@ -28,12 +28,12 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     """Factory per creare l'app Flask."""
     app = Flask(__name__, instance_relative_config=False)
 
-    # Configure session security
+    # Configura la sicurezza della sessione
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(32))
     app.config["SESSION_COOKIE_SECURE"] = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 hour
+    app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 ora
 
     if test_config:
         app.config.update(test_config)
@@ -58,24 +58,24 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
 
     app.jinja_env.filters["safe_color"] = safe_color
 
-    # Middleware to track page visits
+    # Middleware per tracciare le visite alle pagine
     @app.after_request
     def track_page_visit(response):
         """Registra le visite di pagina da parte di utenti autenticati."""
         from flask import session, request
         from f1api.auth_repository import get_auth_repo
         
-        # Only track successful GET requests for logged-in users
+    # Traccia solo le richieste GET riuscite effettuate da utenti autenticati
         if (response.status_code == 200 and 
             request.method == "GET" and 
             "user_id" in session):
             
-            # Skip tracking for static files, API endpoints, and auth pages
+            # Salta il tracciamento per file statici, endpoint API e pagine di autenticazione
             skip_paths = ["/static/", "/api", "/auth/", "/cache/"]
             if not any(request.path.startswith(path) for path in skip_paths):
                 try:
                     auth_repo = get_auth_repo()
-                    # Map common routes to friendly titles
+                    # Mappa percorsi comuni a titoli leggibili
                     page_titles = {
                         "/": "Home",
                         "/drivers": "Drivers List",
@@ -84,7 +84,7 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
                         "/history": "Navigation History"
                     }
                     
-                    # For driver detail pages
+                    # Per le pagine di dettaglio pilota
                     if request.path.startswith("/driver/"):
                         page_title = f"Driver #{request.path.split('/')[-1]}"
                     else:
@@ -96,12 +96,12 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
                         page_title
                     )
                 except Exception:
-                    # Don't fail the request if tracking fails
+                    # Non far fallire la richiesta se il tracciamento fallisce
                     pass
         
         return response
 
-    # register blueprints
+    # registra i blueprint
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(drivers_bp)

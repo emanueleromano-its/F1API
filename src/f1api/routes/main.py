@@ -83,7 +83,7 @@ def history():
     user = get_current_user()
     auth_repo = get_auth_repo()
     
-    # Get history records
+    # Recupera i record della cronologia
     history_records = auth_repo.get_user_history(session["user_id"], limit=100)
     
     return render_template("history.html", user=user, history=history_records)
@@ -95,7 +95,7 @@ def download_history():
     user = get_current_user()
     auth_repo = get_auth_repo()
     
-    # Get history records
+    # Recupera i record della cronologia
     history_records = auth_repo.get_user_history(session["user_id"], limit=1000)
     
     return jsonify({

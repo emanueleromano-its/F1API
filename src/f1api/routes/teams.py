@@ -15,11 +15,11 @@ teams_bp = Blueprint("teams", __name__)
 def teams():
     """Pagina che mostra tutte le scuderie e i loro piloti."""
     
-    # Fetch all drivers from latest session
+    # Recupera tutti i piloti dall'ultima sessione
     drivers_data = fetch_from_f1open("drivers?session_key=latest")
     drivers = drivers_data if isinstance(drivers_data, list) else []
     
-    # Group drivers by team_name
+    # Raggruppa i piloti per nome della scuderia
     teams_dict: Dict[str, List[dict]] = {}
     
     for driver in drivers:
@@ -30,7 +30,7 @@ def teams():
         if team_name not in teams_dict:
             teams_dict[team_name] = []
         
-        # Add driver info to team
+    # Aggiungi le informazioni del pilota alla scuderia
         teams_dict[team_name].append({
             "driver_number": driver.get("driver_number"),
             "full_name": driver.get("full_name"),
@@ -39,10 +39,10 @@ def teams():
             "team_colour": driver.get("team_colour")
         })
     
-    # Convert dict to sorted list of teams
+    # Converte il dict in una lista ordinata di scuderie
     teams_list = []
     for team_name, drivers_list in sorted(teams_dict.items()):
-        # Get team colour from first driver (all drivers in same team have same colour)
+    # Prendi il colore della scuderia dal primo pilota (tutti i piloti della stessa scuderia condividono il colore)
         team_colour = drivers_list[0].get("team_colour") if drivers_list else None
         
         teams_list.append({

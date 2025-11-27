@@ -17,26 +17,26 @@ def race_detail(meeting_key: str):
     Argomenti:
         meeting_key: chiave del meeting (es. "1234" o "latest")
     """
-    # 1. Fetch meeting info
+    # 1. Recupera le informazioni del meeting
     meeting_info = None
     meeting_data = fetch_from_f1open(f"meetings?meeting_key={meeting_key}")
     if isinstance(meeting_data, list) and len(meeting_data) > 0:
         meeting_info = meeting_data[0]
-        # Format date_start
+    # Formatta date_start
         if meeting_info.get("date_start"):
             meeting_info["date_start_formatted"] = format_datetime(meeting_info["date_start"])
-        # Get circuit image URL
+    # Ottieni l'URL dell'immagine del circuito
         circuit_short = meeting_info.get("circuit_short_name")
         meeting_info["circuit_image_url"] = get_circuit_image_url(circuit_short)
     
-    # 2. Fetch all sessions for this meeting
+    # 2. Recupera tutte le sessioni per questo meeting
     sessions_data = fetch_from_f1open(f"sessions?meeting_key={meeting_key}")
     sessions = sessions_data if isinstance(sessions_data, list) else []
     
-    # Sort sessions by date_start
+    # Ordina le sessioni per date_start
     sessions = sorted(sessions, key=lambda s: s.get("date_start", ""))
     
-    # 3. For each session, fetch session results and driver data
+    # 3. Per ogni sessione, recupera i risultati della sessione e i dati dei piloti
     session_results_map = {}
     for session in sessions:
         session_key = session.get("session_key")
@@ -44,29 +44,29 @@ def race_detail(meeting_key: str):
         if not session_key:
             continue
         
-        # Fetch session results
+    # Recupera i risultati della sessione
         results_data = fetch_from_f1open(f"session_result?session_key={session_key}")
         results = results_data if isinstance(results_data, list) else []
         
-        # Fetch driver data for this session
+    # Recupera i dati dei piloti per questa sessione
         drivers_data = fetch_from_f1open(f"drivers?session_key={session_key}")
         drivers = drivers_data if isinstance(drivers_data, list) else []
         
-        # Build driver lookup map by driver_number
+    # Costruisce una mappa di lookup dei piloti per driver_number
         driver_map = {}
         for driver in drivers:
             driver_num = driver.get("driver_number")
             if driver_num:
                 driver_map[driver_num] = driver
         
-        # Sort by position (handle None/DNF cases)
+    # Ordina per posizione (gestisce casi None/DNF)
         results = sorted(results, key=lambda r: r.get("position") if r.get("position") else 999)
         
-        # Enrich results with driver data and computed fields
+    # Arricchisce i risultati con dati pilota e campi calcolati
         for idx, result in enumerate(results):
             driver_num = result.get("driver_number")
             
-            # Merge driver data if available
+            # Unisce i dati del pilota se disponibili
             if driver_num and driver_num in driver_map:
                 driver_info = driver_map[driver_num]
                 result["full_name"] = driver_info.get("full_name") or result.get("full_name")
@@ -74,14 +74,14 @@ def race_detail(meeting_key: str):
                 result["team_name"] = driver_info.get("team_name") or result.get("team_name")
                 result["team_colour"] = driver_info.get("team_colour")
             
-            # Add rank for display
+            # Aggiunge il rank per la visualizzazione
             result["display_position"] = result.get("position") or "DNF"
             
-            # Compute gap to leader (if available)
+            # Calcola il gap dal leader (se disponibile)
             if idx == 0:
                 result["gap_to_leader"] = "Leader"
             
-            # Status formatting
+            # Formattazione dello status
             status = []
             if result.get("dnf"):
                 status.append("DNF")
@@ -98,7 +98,7 @@ def race_detail(meeting_key: str):
             "results": results
         }
     
-    # 4. Fetch all meetings for dropdown selector
+    # 4. Recupera tutti i meeting per il selector del dropdown
     meetings_data = fetch_from_f1open("meetings")
     meetings = meetings_data if isinstance(meetings_data, list) else []
     meetings = sorted(meetings, key=lambda m: m.get("date_start", ""), reverse=True)

@@ -199,7 +199,8 @@
         <div class="teams-grid">
             {% for team in teams %}
             <div class="team-card">
-                <div class="team-header" style="border-bottom-color: {{ team.team_colour|safe_color if team.team_colour else 'var(--accent)' }}">
+                {% set safe_colour = team.team_colour|safe_color if team.get('team_colour') else 'var(--accent)' %}
+                <div class="team-header" {% if safe_colour %} style=""border-bottom-color: {{ safe_colour }}"{% endif %}>
                     <!-- Team car background -->
                     {% if team.team_car_url %}
                     <img class="team-car-bg" src="{{ team.team_car_url }}" alt="{{ team.team_name }} car" loading="lazy">
@@ -207,7 +208,7 @@
                     
                     {% if team.team_colour %}
                     {% set safe_colour = team.team_colour|safe_color %}
-                    <div class="team-color-indicator" style="background: {{ safe_colour }};"></div>
+                    <div class="team-color-indicator" {% if safe_colour %} style=""background: {{ safe_colour }};"{% endif %}></div>
                     {% endif %}
                     
                     <!-- Team logo -->

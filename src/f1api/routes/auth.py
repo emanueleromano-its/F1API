@@ -44,13 +44,13 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
     
-    # POST: process registration
+    # POST: elabora la registrazione
     username = request.form.get("username", "").strip()
     email = request.form.get("email", "").strip()
     password = request.form.get("password", "")
     password_confirm = request.form.get("password_confirm", "")
     
-    # Validation
+    # Validazione
     errors = []
     
     if not username:
@@ -76,7 +76,7 @@ def register():
             flash(error, "danger")
         return render_template("register.html", username=username, email=email)
     
-    # Check if username or email already exists
+    # Verifica se username o email esistono già
     auth_repo = get_auth_repo()
     
     if auth_repo.username_exists(username):
@@ -87,7 +87,7 @@ def register():
         flash("Email already registered. Please use another or log in.", "danger")
         return render_template("register.html", username=username, email="")
     
-    # Create user
+    # Crea utente
     user_id = auth_repo.create_user(username, email, password)
     
     if user_id:
@@ -104,7 +104,7 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
     
-    # POST: process login
+    # POST: elabora il login
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
     
@@ -112,17 +112,17 @@ def login():
         flash("Username and password are required.", "danger")
         return render_template("login.html", username=username)
     
-    # Authenticate
+    # Autentica
     auth_repo = get_auth_repo()
     user = auth_repo.authenticate(username, password)
     
     if user:
-        # Set session
+    # Imposta la sessione
         session["user_id"] = user["id"]
         session["username"] = user["username"]
         flash(f"Welcome back, {user['username']}!", "success")
         
-        # Redirect to next page or home
+    # Reindirizza alla pagina successiva o alla home
         next_page = request.args.get("next")
         if next_page:
             return redirect(next_page)

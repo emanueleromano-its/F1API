@@ -37,7 +37,7 @@ def drivers():
     cols = [col for col in items[0].keys() if col not in exclude]
 
 
-    # Dedup items by 'broadcast_name' (preserve order)
+    # Rimuove duplicati basati su 'broadcast_name' (mantiene l'ordine)
     seen = set()
     unique_items = []
     for item in items:

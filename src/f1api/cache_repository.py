@@ -100,7 +100,7 @@ class CacheRepository:
         if not row:
             return None
         
-        # Check expiration
+    # Verifica la scadenza
         expires_at = row["expires_at"]
         if expires_at:
             expires_dt = datetime.fromisoformat(expires_at)
@@ -251,7 +251,7 @@ class CacheRepository:
             (now,)
         ).fetchone()["count"]
         
-        # Get DB file size
+    # Ottieni la dimensione del file del DB
         db_size = Path(self.db_path).stat().st_size if Path(self.db_path).exists() else 0
         
         return {
