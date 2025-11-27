@@ -1,12 +1,4 @@
-"""Scaffold Flask application per il progetto F1API.
-
-Contiene una factory `create_app`, una funzione helper per chiamare l'API F1Open
-e alcune rotte di esempio (health, drivers, teams, races).
-
-Questo file è un punto di partenza: implementa chiamate HTTP minime e gestione
-degli errori in modo semplice. Estendi i route handler e la logica di parsing
-secondo le necessità dell'API reale.
-"""
+"""Scaffold Flask application per il progetto F1API."""
 from __future__ import annotations
 
 import os
@@ -41,9 +33,9 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     def safe_color(value: Any) -> str:
         """Ritorna un colore esadecimale valido o un default.
 
-        Manteniamo la semplice logica esistente: se il valore è una stringa
-        con 6 caratteri hex lo normalizziamo con '#' e minuscolo, altrimenti
-        ritorniamo un colore di default.
+        L'api ritorna un hex con 6 caratteri 
+        quindi lo normalio con '#' e minuscolo, altrimenti
+        ritorno un colore di default.
         """
         try:
             v = str(value).strip()
@@ -113,6 +105,15 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     # blueprint con route /teams per visualizzare scuderie e piloti
     app.register_blueprint(teams_bp)
 
+    # Pulisce automaticamente le voci di cache scadute all'avvio
+    from f1api.api import get_cache_repo
+    try:
+        cache = get_cache_repo()
+        expired_count = cache.cleanup_expired()
+        if expired_count > 0:
+            print(f"✓ Cache cleanup: removed {expired_count} expired entries")
+    except Exception as e:
+        print(f"⚠ Cache cleanup failed: {e}")
 
     return app
 

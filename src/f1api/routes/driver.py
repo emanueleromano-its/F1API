@@ -32,7 +32,7 @@ def driver_detail(driver_number: str):
     elif isinstance(driver_data, dict) and not driver_data.get("error"):
         driver_info = driver_data
     
-    # Immagine fallback
+    # Se il pilota non ha headshot, imposta un'immagine di default
     if driver_info and not driver_info.get("headshot_url"):
         driver_info["headshot_url"] = "https://media.formula1.com/d_driver_fallback_image.png/content/"
     
@@ -48,8 +48,7 @@ def driver_detail(driver_number: str):
     )
     laps = laps_data if isinstance(laps_data, list) else []
     # 3b. Prova a recuperare i stint per mappare i giri con i compound delle gomme
-    # quando i dati per giro (lap.tyre_compound) non sono disponibili. Costruisce una
-    # mappa lap -> compound: { numero_giro: compound }
+    # e costruisce una mappa lap -> compound: { numero_giro: compound }
     lap_compound_map: Dict[int, str] = {}
     try:
         stints_data = fetch_from_f1open(
