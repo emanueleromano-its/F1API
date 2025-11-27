@@ -364,7 +364,7 @@
                         <tr class="{% if result.position == 1 %}p1{% elif result.position == 2 %}p2{% elif result.position == 3 %}p3{% endif %}">
                             <td class="pos">{{ result.display_position }}</td>
                             <td class="driver-num">
-                                <span class="driver-num-circle" {% if result.team_colour %}style="background-color: {{ result.team_colour|safe_color }};"{% endif %}>{{ result.driver_number or 'N/A' }}</span>
+                                <a href="{{ url_for('driver.driver_detail', driver_number=result.driver_number) }}"><span class="driver-num-circle" {% if result.team_colour %}style="background-color: {{ result.team_colour|safe_color }};"{% endif %}>{{ result.driver_number or 'N/A' }}</span></a>
                             </td>
                             <td class="driver-name">{{ result.full_name or result.name_acronym or 'N/A' }}</td>
                             <td>{{ result.team_name or 'N/A' }}</td>

@@ -47,7 +47,7 @@ CREATE INDEX idx_expires_at ON api_cache(expires_at);
 
 ### Flusso di Richiesta
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. HTTP Request (es. GET /drivers)                          │
 └────────────────────────┬────────────────────────────────────┘
@@ -69,7 +69,7 @@ CREATE INDEX idx_expires_at ON api_cache(expires_at);
              ▼                           ▼
     ┌────────────────┐      ┌─────────────────────────────────┐
     │ Return cached  │      │ 4. Prepara headers con ETag     │
-    │ response       │      │    (If-None-Match da cache stale)│
+    │ response       │      │   (If-None-Match da cache stale)│
     └────────────────┘      └──────────┬──────────────────────┘
                                        │
                                        ▼
@@ -137,6 +137,7 @@ PORT=5000
 ### Conditional Requests (ETag)
 
 Se l'API supporta ETag:
+
 1. Alla prima richiesta, l'ETag viene salvato nella cache
 2. Quando la cache scade, viene inviato `If-None-Match: <etag>`
 3. Se l'API risponde **304 Not Modified**:
@@ -147,8 +148,10 @@ Se l'API supporta ETag:
 ### Fallback su Errori API
 
 Se la chiamata API fallisce (timeout, 500, network error):
+
 1. Verifica se esiste una voce in cache (anche scaduta)
 2. Se esiste, ritorna i dati stale con warning:
+
    ```json
    {
      "data": [...],
@@ -156,11 +159,13 @@ Se la chiamata API fallisce (timeout, 500, network error):
      "_api_error": "Connection timeout"
    }
    ```
+
 3. Se non esiste cache, ritorna errore standard
 
 ### Force Refresh
 
 Per bypassare la cache:
+
 ```python
 from f1api.api import fetch_from_f1open
 
@@ -174,6 +179,7 @@ data = fetch_from_f1open("drivers", force_refresh=True)
 Statistiche cache corrente.
 
 **Response:**
+
 ```json
 {
   "total_entries": 42,
@@ -189,16 +195,19 @@ Statistiche cache corrente.
 Invalida tutta la cache o una risorsa specifica.
 
 **Clear all:**
+
 ```bash
 curl -X POST http://localhost:5000/cache/clear
 ```
 
 **Clear specific URL:**
+
 ```bash
 curl -X POST "http://localhost:5000/cache/clear?url=https://api.openf1.org/v1/drivers"
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Cleared all cache (42 entries)"
@@ -214,6 +223,7 @@ curl -X POST http://localhost:5000/cache/cleanup
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Removed 5 expired entries"
@@ -275,6 +285,7 @@ Copertura richiesta: >80%
 **Causa possibile**: TTL troppo basso o cache non inizializzata
 
 **Debug:**
+
 ```bash
 # Verifica stats
 curl http://localhost:5000/cache/stats
@@ -284,6 +295,7 @@ curl http://localhost:5000/cache/stats
 ```
 
 **Soluzione:**
+
 ```bash
 # Aumenta TTL
 export CACHE_TTL_SECONDS=600
@@ -297,6 +309,7 @@ export CACHE_DB_PATH=/writable/path/cache.db
 **Causa**: Troppe connessioni concorrenti o timeout breve
 
 **Soluzione:**
+
 - SQLite ha un `busy_timeout` default basso
 - Considera connection pooling o passa a PostgreSQL per workload molto concorrenti
 
@@ -305,6 +318,7 @@ export CACHE_DB_PATH=/writable/path/cache.db
 **Causa**: Troppe entry non scadute
 
 **Soluzione:**
+
 ```bash
 # Pulizia manuale delle scadute
 curl -X POST http://localhost:5000/cache/cleanup
@@ -321,6 +335,7 @@ export CACHE_TTL_SECONDS=60
 **Causa**: L'API F1Open potrebbe non restituire header `ETag`
 
 **Verifica:**
+
 ```bash
 curl -I https://api.openf1.org/v1/drivers
 ```
@@ -358,6 +373,7 @@ Per future modifiche dello schema:
 3. Implementa versioning dello schema (es. `PRAGMA user_version`)
 
 **Esempio migrazione:**
+
 ```sql
 -- migrations/001_add_compression.sql
 ALTER TABLE api_cache ADD COLUMN compressed BOOLEAN DEFAULT 0;
@@ -367,6 +383,7 @@ ALTER TABLE api_cache ADD COLUMN compression_algo TEXT;
 ## Conclusioni
 
 Il sistema di cache implementato fornisce:
+
 - ✅ Persistenza SQLite con schema robusto
 - ✅ TTL configurabile
 - ✅ ETag support per conditional requests

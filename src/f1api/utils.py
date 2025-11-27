@@ -1,4 +1,4 @@
-"""Utility functions shared across routes."""
+"""Funzioni di utilità condivise tra le route."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -6,14 +6,14 @@ from typing import Optional
 
 
 def format_datetime(date_raw: Optional[str], fmt: str = "%d/%m/%Y %H:%M") -> Optional[str]:
-    """Parse and format ISO datetime strings.
-    
-    Args:
-        date_raw: ISO format datetime string
-        fmt: Output format (default: dd/mm/yyyy hh:mm)
-    
-    Returns:
-        Formatted string or original value if parsing fails
+    """Analizza e formatta stringhe datetime in formato ISO.
+
+        Argomenti:
+        date_raw: stringa datetime in formato ISO
+        fmt: formato di output (default: dd/mm/YYYY HH:MM)
+
+        Ritorna:
+            Stringa formattata oppure il valore originale se il parsing fallisce
     """
     if not date_raw:
         return None
@@ -30,7 +30,7 @@ def format_datetime(date_raw: Optional[str], fmt: str = "%d/%m/%Y %H:%M") -> Opt
 
 
 def get_country_flags() -> dict[str, str]:
-    """Returns mapping of country names to flag emojis."""
+    """Restituisce una mappatura dei nomi dei paesi alle emoji delle bandiere."""
     return {
         "United States": "🇺🇸",
         "Brazil": "🇧🇷",
@@ -59,7 +59,7 @@ def get_country_flags() -> dict[str, str]:
 
 
 def get_circuit_urls() -> dict[str, str]:
-    """Returns mapping of circuit short names to F1 media URLs."""
+    """Restituisce una mappatura dei nomi brevi dei circuiti agli URL dei media F1."""
     return {
         "Las Vegas": "Las_Vegas",
         "Interlagos": "Brazil",
@@ -89,13 +89,13 @@ def get_circuit_urls() -> dict[str, str]:
 
 
 def get_circuit_image_url(circuit_short_name: Optional[str]) -> str:
-    """Build F1 circuit image URL from circuit short name.
-    
-    Args:
-        circuit_short_name: Short name from API (e.g. "Monza")
-    
-    Returns:
-        Full URL to circuit image or empty string if not found
+    """Costruisce l'URL dell'immagine del circuito a partire dal nome breve.
+
+        Argomenti:
+            circuit_short_name: nome breve come fornito dall'API (es. "Monza")
+
+        Ritorna:
+            URL completo all'immagine del circuito oppure stringa vuota se non trovato
     """
     if not circuit_short_name:
         return ""
@@ -106,13 +106,13 @@ def get_circuit_image_url(circuit_short_name: Optional[str]) -> str:
     return f"https://media.formula1.com/image/upload/c_fit,h_704/q_auto/v1740000000/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/{mapped_name}_Circuit.webp"
 
 def get_team_logo_url(team_name: Optional[str]) -> str:
-    """Build F1 team logo image URL from team name.
-    
-    Args:
-        team_name: Name of the team from API (e.g. "Mercedes")
-    
-    Returns:
-        Full URL to team logo image or empty string if not found
+    """Costruisce l'URL del logo della scuderia a partire dal nome della scuderia.
+
+        Argomenti:
+            team_name: nome della scuderia come fornito dall'API (es. "Mercedes")
+
+        Ritorna:
+            URL completo al logo della scuderia oppure stringa vuota se non trovato
     """
     if not team_name:
         return ""
@@ -124,13 +124,13 @@ def get_team_logo_url(team_name: Optional[str]) -> str:
         return f"https://media.formula1.com/image/upload/c_fit,h_64/q_auto/v1740000000/common/f1/2025/{formatted_name}/2025{formatted_name}logo.webp"
 
 def get_team_car_url(team_name: Optional[str]) -> str:
-    """Build F1 team car image URL from team name.
-    
-    Args:
-        team_name: Name of the team from API (e.g. "Mercedes")
-    
-    Returns:
-        Full URL to team car image or empty string if not found
+    """Costruisce l'URL dell'immagine dell'auto della scuderia a partire dal nome.
+
+        Argomenti:
+            team_name: nome della scuderia come fornito dall'API (es. "Mercedes")
+
+        Ritorna:
+            URL completo all'immagine dell'auto della scuderia oppure stringa vuota se non trovato
     """
     if not team_name:
         return ""

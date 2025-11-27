@@ -1,10 +1,10 @@
-"""Authentication repository module for F1API.
+"""Repository per l'autenticazione per F1API.
 
-Provides user authentication and management with:
-- Secure password hashing (bcrypt)
-- User registration and login
-- SQLite-based user storage
-- Thread-safe operations
+Fornisce gestione e autenticazione degli utenti con:
+- hashing sicuro delle password (bcrypt)
+- registrazione e login utenti
+- memorizzazione su SQLite
+- operazioni thread-safe
 """
 from __future__ import annotations
 
@@ -19,13 +19,13 @@ import bcrypt
 
 
 class AuthRepository:
-    """Thread-safe SQLite repository for user authentication."""
+    """Repository SQLite thread-safe per l'autenticazione degli utenti."""
 
     def __init__(self, db_path: Optional[str] = None):
-        """Initialize auth repository.
-        
-        Args:
-            db_path: Path to SQLite database file (default: ./data/users.db)
+        """Inizializza il repository di autenticazione.
+
+        Argomenti:
+            db_path: percorso del file SQLite (default: ./data/users.db)
         """
         self.db_path = db_path or os.getenv("AUTH_DB_PATH", "./data/users.db")
         self._local = threading.local()
@@ -33,7 +33,7 @@ class AuthRepository:
         self._ensure_db()
 
     def _ensure_db(self) -> None:
-        """Create database file and schema if not exists."""
+        """Crea il file del database e lo schema se non esistono."""
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -67,7 +67,7 @@ class AuthRepository:
             conn.close()
 
     def _get_connection(self) -> sqlite3.Connection:
-        """Get thread-local database connection."""
+        """Ottiene la connessione al database locale al thread."""
         if not hasattr(self._local, "conn") or self._local.conn is None:
             self._local.conn = sqlite3.connect(self.db_path)
             self._local.conn.row_factory = sqlite3.Row
@@ -75,13 +75,14 @@ class AuthRepository:
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash password using bcrypt.
-        
-        Args:
-            password: Plain text password
-            
-        Returns:
-            Hashed password as string
+        """Hash della password usando bcrypt.
+
+
+        Argomenti:
+            password: password in chiaro
+
+        Ritorna:
+            Password hashed come stringa
         """
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -89,14 +90,15 @@ class AuthRepository:
 
     @staticmethod
     def verify_password(password: str, password_hash: str) -> bool:
-        """Verify password against hash.
-        
-        Args:
-            password: Plain text password
-            password_hash: Stored password hash
-            
-        Returns:
-            True if password matches, False otherwise
+        """Verifica la password rispetto all'hash.
+
+
+        Argomenti:
+            password: password in chiaro
+            password_hash: hash memorizzato
+
+        Ritorna:
+            True se la password corrisponde, False altrimenti
         """
         try:
             return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
@@ -104,15 +106,16 @@ class AuthRepository:
             return False
 
     def create_user(self, username: str, email: str, password: str) -> Optional[int]:
-        """Create new user.
-        
-        Args:
-            username: Unique username
-            email: Unique email address
-            password: Plain text password (will be hashed)
-            
-        Returns:
-            User ID if successful, None if username/email already exists
+        """Crea un nuovo utente.
+
+
+        Argomenti:
+            username: username univoco
+            email: indirizzo email univoco
+            password: password in chiaro (verrà hashata)
+
+        Ritorna:
+            ID utente se successo, None se username/email già esistono
         """
         password_hash = self.hash_password(password)
         created_at = datetime.utcnow().isoformat()
@@ -134,13 +137,14 @@ class AuthRepository:
             return None
 
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        """Get user by username.
-        
-        Args:
-            username: Username to search for
-            
-        Returns:
-            User dict with id, username, email, created_at, last_login or None
+        """Recupera l'utente per username.
+
+
+        Argomenti:
+            username: username da cercare
+
+        Ritorna:
+            Dizionario utente con id, username, email, created_at, last_login o None
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -153,13 +157,14 @@ class AuthRepository:
         return None
 
     def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
-        """Get user by ID.
-        
-        Args:
-            user_id: User ID to search for
-            
-        Returns:
-            User dict with id, username, email, created_at, last_login or None
+        """Recupera l'utente per ID.
+
+
+        Argomenti:
+            user_id: ID dell'utente
+
+        Ritorna:
+            Dizionario utente con id, username, email, created_at, last_login o None
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -172,14 +177,15 @@ class AuthRepository:
         return None
 
     def authenticate(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Authenticate user with username and password.
-        
-        Args:
-            username: Username
-            password: Plain text password
-            
-        Returns:
-            User dict if authentication successful, None otherwise
+        """Autentica l'utente con username e password.
+
+
+        Argomenti:
+            username: username
+            password: password in chiaro
+
+        Ritorna:
+            Dizionario utente se autenticazione avvenuta, None altrimenti
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -208,10 +214,10 @@ class AuthRepository:
         }
 
     def update_last_login(self, user_id: int) -> None:
-        """Update user's last login timestamp.
-        
-        Args:
-            user_id: User ID
+        """Aggiorna il timestamp dell'ultimo login dell'utente.
+
+        Argomenti:
+            user_id: ID dell'utente
         """
         last_login = datetime.utcnow().isoformat()
         with self._lock:
@@ -223,13 +229,14 @@ class AuthRepository:
             conn.commit()
 
     def username_exists(self, username: str) -> bool:
-        """Check if username already exists.
-        
-        Args:
-            username: Username to check
-            
-        Returns:
-            True if exists, False otherwise
+        """Verifica se uno username esiste già.
+
+
+        Argomenti:
+            username: username da verificare
+
+        Ritorna:
+            True se esiste, False altrimenti
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -240,13 +247,14 @@ class AuthRepository:
         return row["count"] > 0
 
     def email_exists(self, email: str) -> bool:
-        """Check if email already exists.
-        
-        Args:
-            email: Email to check
-            
-        Returns:
-            True if exists, False otherwise
+        """Verifica se un'email è già registrata.
+
+
+        Argomenti:
+            email: email da verificare
+
+        Ritorna:
+            True se esiste, False altrimenti
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -257,12 +265,12 @@ class AuthRepository:
         return row["count"] > 0
 
     def track_page_visit(self, user_id: int, page_url: str, page_title: Optional[str] = None) -> None:
-        """Track a page visit for a user.
-        
-        Args:
-            user_id: User ID
-            page_url: URL of the visited page
-            page_title: Optional title of the page
+        """Registra la visita di una pagina per un utente.
+
+        Argomenti:
+            user_id: ID dell'utente
+            page_url: URL della pagina visitata
+            page_title: titolo opzionale della pagina
         """
         visited_at = datetime.utcnow().isoformat()
         with self._lock:
@@ -277,14 +285,15 @@ class AuthRepository:
             conn.commit()
 
     def get_user_history(self, user_id: int, limit: int = 50) -> list:
-        """Get page visit history for a user.
-        
-        Args:
-            user_id: User ID
-            limit: Maximum number of records to return (default: 50)
-            
-        Returns:
-            List of history records with id, page_url, page_title, visited_at
+        """Recupera la cronologia delle visite di pagina per un utente.
+
+
+        Argomenti:
+            user_id: ID dell'utente
+            limit: numero massimo di record da restituire (default: 50)
+
+        Ritorna:
+            Lista di record della cronologia contenenti id, page_url, page_title, visited_at
         """
         conn = self._get_connection()
         cursor = conn.execute(
@@ -301,13 +310,14 @@ class AuthRepository:
         return [dict(row) for row in rows]
 
     def clear_user_history(self, user_id: int) -> int:
-        """Clear all history for a user.
-        
-        Args:
-            user_id: User ID
-            
-        Returns:
-            Number of records deleted
+        """Cancella tutta la cronologia per un utente.
+
+
+        Argomenti:
+            user_id: ID dell'utente
+
+        Ritorna:
+            Numero di record eliminati
         """
         with self._lock:
             conn = self._get_connection()
@@ -319,7 +329,7 @@ class AuthRepository:
             return cursor.rowcount
 
     def close(self) -> None:
-        """Close database connection for current thread."""
+        """Chiude la connessione al database per il thread corrente."""
         if hasattr(self._local, "conn") and self._local.conn:
             self._local.conn.close()
             self._local.conn = None
@@ -330,7 +340,7 @@ _auth_repo: Optional[AuthRepository] = None
 
 
 def get_auth_repo() -> AuthRepository:
-    """Get or create global AuthRepository instance."""
+    """Ottiene o crea l'istanza globale di AuthRepository."""
     global _auth_repo
     if _auth_repo is None:
         _auth_repo = AuthRepository()

@@ -39,7 +39,7 @@ Ho implementato un sistema di autenticazione completo per la tua applicazione F1
 
 ### Nuovi File
 
-```
+```text
 src/f1api/
 ├── auth_repository.py          # Repository per gestione utenti
 ├── auth_decorators.py          # Decoratori @login_required
@@ -57,7 +57,7 @@ README_AUTH.md                 # Documentazione completa
 
 ### File Modificati
 
-```
+```text
 src/f1api/
 ├── app.py                     # Aggiunto auth_bp, SECRET_KEY config
 ├── routes/main.py             # Cambiato / da JSON a HTML home
@@ -155,10 +155,6 @@ Apri il browser su: `http://localhost:5000`
 3. Clicca "Login"
 4. Verrai reindirizzato alla home page
 
-**Credenziali di test** (se hai eseguito `test_auth.py`):
-- Username: `testuser`
-- Password: `testpassword123`
-
 ### Navigazione
 
 - **Home** (`/`) - Dashboard principale
@@ -230,7 +226,7 @@ CREATE TABLE users (
 
 ## 📊 Struttura Route
 
-```
+```text
 / (GET)                        → Home page
 /api (GET)                     → API info (JSON)
 
@@ -254,6 +250,7 @@ CREATE TABLE users (
 ### Flash Messages
 
 I messaggi vengono mostrati automaticamente in 4 colori:
+
 - 🟢 **Success** - Operazioni riuscite
 - 🔴 **Danger** - Errori
 - 🟡 **Warning** - Avvisi
@@ -262,6 +259,7 @@ I messaggi vengono mostrati automaticamente in 4 colori:
 ### Navigation Dinamica
 
 L'header mostra automaticamente:
+
 - **Non loggato**: Login | Register
 - **Loggato**: Profile | Logout
 
@@ -327,6 +325,7 @@ Per il deploy in produzione, assicurati di:
 ## 📞 Supporto
 
 Per domande o problemi:
+
 - Controlla `README_AUTH.md`
 - Esegui `test_auth.py` per verificare il setup
 - Controlla i log Flask per errori dettagliati

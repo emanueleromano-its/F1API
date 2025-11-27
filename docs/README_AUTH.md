@@ -125,6 +125,7 @@ python test_auth.py
 ```
 
 This will:
+
 - Create a test user
 - Test password hashing
 - Test authentication
@@ -204,7 +205,7 @@ Possible improvements:
 
 ## File Structure
 
-```
+```text
 src/f1api/
 ├── auth_repository.py       # User database operations
 ├── auth_decorators.py       # Login required decorator

@@ -15,7 +15,7 @@ _cache_repo = None
 
 
 def get_cache_repo() -> CacheRepository:
-    """Get or create the global cache repository instance."""
+    """Ottiene o crea l'istanza globale del repository di cache."""
     global _cache_repo
     if _cache_repo is None:
         ttl = int(os.getenv("CACHE_TTL_SECONDS", "300"))  # Default: 5 minutes
@@ -30,12 +30,12 @@ def fetch_from_f1open(
 ) -> Optional[Dict[str, Any]]:
     """Esegue una GET verso l'API F1Open con caching persistente.
     
-    Args:
+    Argomenti:
         path: percorso relativo (senza slash iniziale) es. 'drivers' o 'races/2024'
         params: dizionario di query params
         force_refresh: se True, bypassa la cache e forza una nuova chiamata API
-        
-    Returns:
+
+    Ritorna:
         JSON response o dict con errore. Include flag 'from_cache' e 'stale' quando applicabili.
     """
     url = f"{F1OPEN_API_BASE.rstrip('/')}/{path.lstrip('/')}"

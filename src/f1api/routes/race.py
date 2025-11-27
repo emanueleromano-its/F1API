@@ -14,7 +14,7 @@ race_bp = Blueprint("race", __name__)
 def race_detail(meeting_key: str):
     """Pagina dettaglio race meeting con info circuito e classifiche per ogni sessione.
     
-    Args:
+    Argomenti:
         meeting_key: chiave del meeting (es. "1234" o "latest")
     """
     # 1. Fetch meeting info

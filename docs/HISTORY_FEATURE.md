@@ -7,12 +7,14 @@
 **Problema risolto**: Le pagine principali erano accessibili senza login.
 
 **Route protette** (ora richiedono autenticazione):
+
 - `/drivers` - Lista piloti
 - `/driver/<number>` - Dettaglio pilota
 - `/teams` - Lista team
 - `/races` - Calendario gare
 
 **Implementazione**:
+
 ```python
 from f1api.auth_decorators import login_required
 
@@ -30,6 +32,7 @@ def drivers():
 #### Database Schema
 
 Nuova tabella `page_history`:
+
 ```sql
 CREATE TABLE page_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,6 +47,7 @@ CREATE TABLE page_history (
 #### Tracking Automatico
 
 **Middleware** in `app.py` che traccia automaticamente:
+
 - ✅ Ogni pagina visitata (GET requests)
 - ✅ Solo per utenti loggati (session attiva)
 - ✅ URL della pagina
@@ -51,6 +55,7 @@ CREATE TABLE page_history (
 - ✅ Timestamp della visita
 
 **Pagine escluse dal tracking**:
+
 - `/static/*` - File statici
 - `/api/*` - Endpoint API
 - `/auth/*` - Pagine di autenticazione
@@ -61,6 +66,7 @@ CREATE TABLE page_history (
 **URL**: `http://localhost:5000/history`
 
 **Funzionalità**:
+
 - 📜 Visualizza cronologia completa della navigazione
 - 📊 Statistiche: totale visite, pagine unique, ultima visita
 - 🎨 Timeline visiva con icone per tipo di pagina
@@ -80,50 +86,68 @@ CREATE TABLE page_history (
 ## 📁 File Modificati
 
 ### 1. `src/f1api/auth_repository.py`
+
 **Modifiche**:
+
 - ➕ Creazione tabella `page_history`
 - ➕ Metodo `track_page_visit(user_id, page_url, page_title)`
 - ➕ Metodo `get_user_history(user_id, limit=50)`
 - ➕ Metodo `clear_user_history(user_id)`
 
 ### 2. `src/f1api/app.py`
+
 **Modifiche**:
+
 - ➕ Middleware `@app.after_request` per tracking automatico
 - ➕ Logic per mappare URL a titoli user-friendly
 - ➕ Gestione errori per tracking (non fail request se tracking fallisce)
 
 ### 3. `src/f1api/routes/drivers.py`
+
 **Modifiche**:
+
 - ➕ Import `login_required`
 - ➕ Decoratore `@login_required` su route `/drivers`
 
 ### 4. `src/f1api/routes/driver.py`
+
 **Modifiche**:
+
 - ➕ Import `login_required`
 - ➕ Decoratore `@login_required` su route `/driver/<number>`
 
 ### 5. `src/f1api/routes/teams.py`
+
 **Modifiche**:
+
 - ➕ Import `login_required`
 - ➕ Decoratore `@login_required` su route `/teams`
 
 ### 6. `src/f1api/routes/races.py`
+
 **Modifiche**:
+
 - ➕ Import `login_required`
 - ➕ Decoratore `@login_required` su route `/races`
 
 ### 7. `src/f1api/routes/main.py`
+
 **Modifiche**:
+
 - ➕ Import `login_required`, `get_auth_repo`
 - ➕ Route `/history` - visualizza cronologia
 - ➕ Route `/history/clear` - cancella cronologia
 
 ### 8. `src/f1api/templates/base.html`
+
 **Modifiche**:
+
 - ➕ Link "History" nella navbar (solo per utenti loggati)
 
 ### 9. `src/f1api/templates/history.html` (NUOVO)
+
 **Contenuto**:
+
 - 📊 Dashboard statistiche (total visits, unique pages, last visit)
 - 📜 Timeline cronologica con icone
 - 🎨 Design responsive e coerente con tema F1
@@ -135,11 +159,13 @@ CREATE TABLE page_history (
 ## 🎯 Flusso Utente
 
 ### Scenario 1: Utente Non Loggato
+
 1. Visita `/drivers` → **Redirect** a `/auth/login`
 2. Flash message: "Please log in to access this page"
 3. Dopo login → Redirect a `/drivers`
 
 ### Scenario 2: Utente Loggato
+
 1. Login → Home page
 2. Clicca "Drivers" → **Accesso consentito** + tracking automatico
 3. Naviga "Teams", "Races", dettagli piloti → **Tutto tracciato**
@@ -173,6 +199,7 @@ def track_page_visit(response):
 ### Titoli Pagina
 
 Mapping automatico URL → Titolo:
+
 - `/` → "Home"
 - `/drivers` → "Drivers List"
 - `/teams` → "Teams"
@@ -194,6 +221,7 @@ Mapping automatico URL → Titolo:
 ## 📊 Esempi Query Database
 
 ### Visualizza history di un utente
+
 ```sql
 SELECT page_url, page_title, visited_at
 FROM page_history
@@ -203,6 +231,7 @@ LIMIT 50;
 ```
 
 ### Conta visite per pagina
+
 ```sql
 SELECT page_url, COUNT(*) as visits
 FROM page_history
@@ -212,6 +241,7 @@ ORDER BY visits DESC;
 ```
 
 ### Pagine più visitate (tutti gli utenti)
+
 ```sql
 SELECT page_url, COUNT(*) as visits
 FROM page_history
@@ -227,6 +257,7 @@ LIMIT 10;
 ### 1. Test Protezione Route
 
 **Scenario**: Accesso senza login
+
 ```bash
 # In una finestra privata/incognito
 1. Vai su http://localhost:5000/drivers
@@ -237,6 +268,7 @@ LIMIT 10;
 ### 2. Test Tracking
 
 **Scenario**: Navigazione con tracking
+
 ```bash
 1. Login con un account
 2. Visita: /drivers
@@ -249,6 +281,7 @@ LIMIT 10;
 ### 3. Test Clear History
 
 **Scenario**: Cancellazione history
+
 ```bash
 1. Vai su /history
 2. Clicca "Clear History"
@@ -260,6 +293,7 @@ LIMIT 10;
 ### 4. Test Icone
 
 **Scenario**: Verifica icone corrette
+
 ```bash
 1. Visita varie pagine
 2. Vai su /history
@@ -275,11 +309,13 @@ LIMIT 10;
 ## 🎨 UI Features
 
 ### Statistiche Dashboard
+
 - **Total Visits** - Numero totale di visite
 - **Unique Pages** - Pagine unique visitate
 - **Last Visit** - Data ultima visita
 
 ### Timeline
+
 - Design card-based con hover effects
 - Icone colorate per tipo pagina
 - Link cliccabili per tornare alle pagine
@@ -287,6 +323,7 @@ LIMIT 10;
 - URL in monospace per leggibilità
 
 ### Empty State
+
 - Messaggio friendly
 - Link rapidi per iniziare a navigare
 - Design coerente con resto app
@@ -347,6 +384,7 @@ LIMIT 10;
 ## 🎉 Risultato Finale
 
 **Ora l'applicazione**:
+
 1. ✅ Richiede login per accedere alle pagine principali
 2. ✅ Traccia automaticamente la navigazione di ogni utente
 3. ✅ Mostra cronologia in una pagina dedicata con statistiche

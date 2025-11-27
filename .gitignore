@@ -1,21 +1,95 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environment
-venv/
-.env/
-.venv/
-
 # Distribution / packaging
 dist/
 build/
 *.egg-info/
 
-# Jupyter
-.ipynb_checkpoints/
-
 # OS files
 .DS_Store
 Thumbs.db
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Editor temporary files
+*~
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.settings/
+
+# Python bytecode / caches / distributions
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg
+*.egg-info/
+pip-wheel-metadata/
+dist/
+build/
+*.whl
+
+# Virtual environments & environment config
+venv/
+ENV/
+env/
+.venv/
+.env
+.env.*
+Pipfile.lock
+poetry.lock
+
+# Testing / coverage
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Type checkers / linters / caches
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Logs, databases, runtime files
+*.log
+*.sql
+*.sqlite3
+*.db
+*.db-journal
+celerybeat-schedule
+*.pid
+
+# Jupyter
+.ipynb_checkpoints/
+jupyter_runtime/
+*.nbconvert.ipynb
+
+# Documentation builds
+docs/_build/
+
+# Static/media generated files
+media/
+staticfiles/
+
+# Local settings / secrets / certificates
+local_settings.py
+credentials.json
+secret.*
+*.key
+*.pem
+*.crt
+
+# Misc OS
+.DS_Store
+Thumbs.db
+
+# Coverage / profiling
+.prof

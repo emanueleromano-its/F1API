@@ -1,11 +1,11 @@
-"""Cache repository module for F1API.
+"""Repository di cache per F1API.
 
-Provides persistent SQLite-based caching for API responses with:
-- TTL-based expiration
-- ETag support for conditional requests
-- Thread-safe operations
-- Fallback to stale cache on API errors
-- Configurable cache invalidation
+Fornisce caching persistente su SQLite per le risposte API con:
+- scadenza basata su TTL
+- supporto ETag per richieste condizionali
+- operazioni thread-safe
+- fallback su cache obsoleta in caso di errori API
+- invalidazione configurabile della cache
 """
 from __future__ import annotations
 
@@ -20,14 +20,14 @@ from typing import Any, Dict, Optional, Tuple
 
 
 class CacheRepository:
-    """Thread-safe SQLite cache for API responses."""
+    """Cache SQLite thread-safe per le risposte API."""
 
     def __init__(self, db_path: Optional[str] = None, default_ttl_seconds: int = 300):
-        """Initialize cache repository.
-        
-        Args:
-            db_path: Path to SQLite database file (default: ./data/cache.db)
-            default_ttl_seconds: Default TTL for cached entries (default: 300s = 5min)
+        """Inizializza il repository di cache.
+
+        Argomenti:
+            db_path: percorso del file SQLite (default: ./data/cache.db)
+            default_ttl_seconds: TTL di default per le voci in cache (default: 300s)
         """
         self.db_path = db_path or os.getenv("CACHE_DB_PATH", "./data/cache.db")
         self.default_ttl = default_ttl_seconds
@@ -36,7 +36,7 @@ class CacheRepository:
         self._ensure_db()
 
     def _ensure_db(self) -> None:
-        """Create database file and schema if not exists."""
+        """Crea il file del database e lo schema se non esistono."""
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -59,7 +59,7 @@ class CacheRepository:
             conn.close()
 
     def _get_connection(self) -> sqlite3.Connection:
-        """Get thread-local database connection."""
+        """Ottiene la connessione al database locale al thread."""
         if not hasattr(self._local, "conn"):
             self._local.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             self._local.conn.row_factory = sqlite3.Row
@@ -67,27 +67,27 @@ class CacheRepository:
 
     @staticmethod
     def _make_resource_key(url: str, params: Optional[Dict[str, Any]] = None) -> str:
-        """Generate unique cache key from URL and params.
-        
-        Args:
-            url: Full API URL
-            params: Query parameters dict
-            
-        Returns:
-            SHA256 hash of normalized URL+params
+        """Genera una chiave univoca di cache da URL e parametri.
+
+        Argomenti:
+            url: URL completo dell'API
+            params: dizionario dei parametri di query
+
+        Ritorna:
+            hash SHA256 della stringa normalizzata URL+params
         """
         normalized = f"{url}?{json.dumps(params or {}, sort_keys=True)}"
         return hashlib.sha256(normalized.encode()).hexdigest()
 
     def get(self, url: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-        """Retrieve cached response if valid.
-        
-        Args:
-            url: API URL
-            params: Query parameters
-            
-        Returns:
-            Cached response dict or None if not found/expired
+        """Recupera la risposta in cache se ancora valida.
+
+        Argomenti:
+            url: URL dell'API
+            params: parametri di query
+
+        Ritorna:
+            Dizionario della risposta in cache o None se non trovata/scaduta
         """
         key = self._make_resource_key(url, params)
         conn = self._get_connection()
@@ -117,14 +117,14 @@ class CacheRepository:
         }
 
     def get_stale(self, url: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-        """Retrieve cached response even if expired (for fallback).
-        
-        Args:
-            url: API URL
-            params: Query parameters
-            
-        Returns:
-            Cached response dict or None if not found
+        """Recupera la risposta in cache anche se scaduta (per fallback).
+
+        Argomenti:
+            url: URL dell'API
+            params: parametri di query
+
+        Ritorna:
+            Dizionario della risposta in cache o None se non trovata
         """
         key = self._make_resource_key(url, params)
         conn = self._get_connection()
@@ -157,16 +157,16 @@ class CacheRepository:
         etag: Optional[str] = None,
         ttl_seconds: Optional[int] = None
     ) -> None:
-        """Save API response to cache.
-        
-        Args:
-            url: API URL
-            params: Query parameters
-            response_body: Response data (will be JSON serialized)
-            status_code: HTTP status code
-            headers: Response headers
-            etag: ETag value for conditional requests
-            ttl_seconds: TTL override (default uses default_ttl)
+        """Salva la risposta API nella cache.
+
+        Argomenti:
+            url: URL dell'API
+            params: parametri di query
+            response_body: dati della risposta (verranno serializzati in JSON)
+            status_code: codice di stato HTTP
+            headers: header della risposta
+            etag: valore ETag per richieste condizionali
+            ttl_seconds: override del TTL (usa default_ttl se None)
         """
         key = self._make_resource_key(url, params)
         ttl = ttl_seconds if ttl_seconds is not None else self.default_ttl
@@ -201,14 +201,14 @@ class CacheRepository:
             conn.commit()
 
     def invalidate(self, url: Optional[str] = None, params: Optional[Dict[str, Any]] = None) -> int:
-        """Invalidate cache entries.
-        
-        Args:
-            url: Specific URL to invalidate (if None, clear all)
-            params: Query parameters (only used if url is specified)
-            
-        Returns:
-            Number of entries deleted
+        """Invalidare voci di cache.
+
+        Argomenti:
+            url: URL specifico da invalidare (se None, cancella tutte le voci)
+            params: parametri di query (usati solo se specificato l'url)
+
+        Ritorna:
+            Numero di voci cancellate
         """
         conn = self._get_connection()
         with self._lock:
@@ -221,10 +221,10 @@ class CacheRepository:
             return cursor.rowcount
 
     def cleanup_expired(self) -> int:
-        """Remove expired entries from cache.
-        
-        Returns:
-            Number of entries deleted
+        """Rimuove le voci scadute dalla cache.
+
+        Ritorna:
+            Numero di voci eliminate
         """
         conn = self._get_connection()
         with self._lock:
@@ -237,10 +237,10 @@ class CacheRepository:
             return cursor.rowcount
 
     def stats(self) -> Dict[str, Any]:
-        """Get cache statistics.
-        
-        Returns:
-            Dict with total entries, expired count, size
+        """Ottiene statistiche della cache.
+
+        Ritorna:
+            Dizionario con voci totali, scadute, dimensione
         """
         conn = self._get_connection()
         total = conn.execute("SELECT COUNT(*) as count FROM api_cache").fetchone()["count"]
@@ -263,7 +263,7 @@ class CacheRepository:
         }
 
     def close(self) -> None:
-        """Close database connection."""
+        """Chiude la connessione al database."""
         if hasattr(self._local, "conn"):
             self._local.conn.close()
             delattr(self._local, "conn")

@@ -42,6 +42,12 @@
             opacity: 0.15;
             filter: grayscale(0.3);
             pointer-events: none;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        .team-card:hover .team-car-bg {
+            opacity: 0.6;
+            filter: grayscale(0) brightness(1.1);
         }
 
         .team-color-indicator {
@@ -114,12 +120,18 @@
             color: var(--muted);
         }
 
-        .driver-number {
-            font-size: 24px;
+
+        .driver-num-circle {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
             font-weight: 700;
-            color: var(--accent);
-            min-width: 40px;
-            text-align: right;
+            font-size: 16px;
         }
 
         .page-header {
@@ -218,7 +230,7 @@
                             <p class="driver-name">{{ driver.full_name }}</p>
                             <p class="driver-meta">{{ driver.name_acronym }}</p>
                         </div>
-                        <div class="driver-number">#{{ driver.driver_number }}</div>
+                        <span class="driver-num-circle" {% if team.team_colour %}style="background-color: {{ team.team_colour|safe_color }};"{% endif %}>{{ driver.driver_number }}</span>
                     </a>
                     {% endfor %}
                 </div>

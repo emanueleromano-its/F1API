@@ -61,7 +61,7 @@ def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
     # Middleware to track page visits
     @app.after_request
     def track_page_visit(response):
-        """Track authenticated user page visits."""
+        """Registra le visite di pagina da parte di utenti autenticati."""
         from flask import session, request
         from f1api.auth_repository import get_auth_repo
         

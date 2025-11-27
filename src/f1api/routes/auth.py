@@ -13,26 +13,26 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 def is_valid_email(email: str) -> bool:
-    """Validate email format.
-    
-    Args:
-        email: Email address to validate
-        
-    Returns:
-        True if valid email format, False otherwise
+    """Valida il formato di un indirizzo email.
+
+    Argomenti:
+        email: indirizzo email da validare
+
+    Ritorna:
+        True se il formato è valido, False altrimenti
     """
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
 
 def is_valid_username(username: str) -> bool:
-    """Validate username format.
-    
-    Args:
-        username: Username to validate
-        
-    Returns:
-        True if valid (3-20 chars, alphanumeric + underscore), False otherwise
+    """Valida il formato dello username.
+
+    Argomenti:
+        username: username da validare
+
+    Ritorna:
+        True se valido (3-20 caratteri, alfanumerico e underscore), False altrimenti
     """
     pattern = r'^[a-zA-Z0-9_]{3,20}$'
     return re.match(pattern, username) is not None
@@ -40,7 +40,7 @@ def is_valid_username(username: str) -> bool:
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
-    """User registration page."""
+    """Pagina di registrazione utente."""
     if request.method == "GET":
         return render_template("register.html")
     
@@ -100,7 +100,7 @@ def register():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """User login page."""
+    """Pagina di login utente."""
     if request.method == "GET":
         return render_template("login.html")
     
@@ -135,7 +135,7 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
-    """User logout."""
+    """Logout utente."""
     username = session.get("username", "User")
     session.clear()
     flash(f"Goodbye, {username}! You have been logged out.", "info")
@@ -145,7 +145,7 @@ def logout():
 @auth_bp.route("/profile")
 @login_required
 def profile():
-    """User profile page (protected)."""
+    """Pagina profilo utente (protetta)."""
     from f1api.auth_decorators import get_current_user
     user = get_current_user()
     return render_template("profile.html", user=user)

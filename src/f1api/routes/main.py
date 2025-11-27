@@ -13,14 +13,14 @@ main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/", methods=["GET"])
 def home():
-    """Home page - landing page with auth status."""
+    """Pagina principale - landing che mostra lo stato di autenticazione."""
     user = get_current_user() if is_authenticated() else None
     return render_template("home.html", user=user)
 
 
 @main_bp.route("/api", methods=["GET"])
 def api_info():
-    """API information endpoint (JSON)."""
+    """Endpoint informativo dell'API (JSON)."""
     return jsonify({
         "service": "F1API with persistent SQLite cache",
         "endpoints": [
@@ -48,7 +48,7 @@ def position():
 
 @main_bp.route("/cache/stats", methods=["GET"])
 def cache_stats():
-    """Get cache statistics."""
+    """Ottiene le statistiche della cache."""
     cache = get_cache_repo()
     stats = cache.stats()
     return jsonify(stats)
@@ -56,7 +56,7 @@ def cache_stats():
 
 @main_bp.route("/cache/clear", methods=["POST"])
 def cache_clear():
-    """Clear all cache entries or specific URL."""
+    """Svuota tutte le voci della cache o una URL specifica."""
     cache = get_cache_repo()
     url = request.args.get("url")
     
@@ -70,7 +70,7 @@ def cache_clear():
 
 @main_bp.route("/cache/cleanup", methods=["POST"])
 def cache_cleanup():
-    """Remove expired cache entries."""
+    """Rimuove le voci scadute dalla cache."""
     cache = get_cache_repo()
     count = cache.cleanup_expired()
     return jsonify({"message": f"Removed {count} expired entries"})
@@ -79,7 +79,7 @@ def cache_cleanup():
 @main_bp.route("/history", methods=["GET"])
 @login_required
 def history():
-    """Display user's navigation history."""
+    """Mostra la cronologia di navigazione dell'utente."""
     user = get_current_user()
     auth_repo = get_auth_repo()
     
@@ -88,11 +88,29 @@ def history():
     
     return render_template("history.html", user=user, history=history_records)
 
+@main_bp.route("/history/download", methods=["GET"])
+@login_required
+def download_history():
+    """Scarica la cronologia di navigazione dell'utente in formato JSON."""
+    user = get_current_user()
+    auth_repo = get_auth_repo()
+    
+    # Get history records
+    history_records = auth_repo.get_user_history(session["user_id"], limit=1000)
+    
+    return jsonify({
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user["email"]
+        },
+        "history": history_records
+    })
 
 @main_bp.route("/history/clear", methods=["POST"])
 @login_required
 def clear_history():
-    """Clear user's navigation history."""
+    """Svuota la cronologia di navigazione dell'utente."""
     auth_repo = get_auth_repo()
     count = auth_repo.clear_user_history(session["user_id"])
     flash(f"Successfully cleared {count} history records.", "success")

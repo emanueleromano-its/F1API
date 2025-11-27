@@ -2,6 +2,23 @@
 
 {% block title %}Piloti - F1API{% endblock %}
 
+{% block extra_head %}
+    <style>
+        .driver-num-circle {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <h1>Piloti</h1>
     {% if error %}
@@ -27,7 +44,9 @@
                             <tr {% if row_color %}style="background: linear-gradient(var(--card) 90%, {{ row_color }})"{% endif %}>
                                 {% for col in cols %}
                                     {% if col == "driver_number" %}
-                                        <td><a href="/driver/{{ item.get(col) }}" {% if row_color %}style="color: {{row_color}};"{% endif %}>{{ item.get(col) }}</a></td>
+                                        <td>
+                                            <a href="{{ url_for('driver.driver_detail', driver_number=item.get('driver_number')) }}"><span class="driver-num-circle" {% if item.get('team_colour') %}style="background-color: {{ item.get('team_colour')|safe_color }};"{% endif %}>{{ item.get(col) }}</span></a>
+                                        </td>
                                     {% else %}
                                         {% if col != "team_colour" %}
                                             {% if col == "headshot_url" %}

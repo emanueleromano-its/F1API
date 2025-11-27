@@ -190,7 +190,7 @@
         .history-header {
             flex-direction: column;
             gap: 16px;
-            align-items: stretch;
+            align-items: flex-start;
         }
 
         .clear-history-btn {
@@ -216,6 +216,9 @@
     <div class="history-header">
         <h1>📜 Navigation History</h1>
         {% if history and history|length > 0 %}
+        <form method="GET" action="/history/download">
+            <button type="submit" class="clear-history-btn" aria-label="Download history as JSON">⬇️ Download History (JSON)</button>
+        </form>
         <form method="POST" action="{{ url_for('main.clear_history') }}" onsubmit="return confirm('Are you sure you want to clear all history?');">
             <button type="submit" class="clear-history-btn">🗑️ Clear History</button>
         </form>

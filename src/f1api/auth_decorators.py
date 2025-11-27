@@ -1,4 +1,4 @@
-"""Authentication decorators and utilities for F1API."""
+"""Decorator e utility per l'autenticazione in F1API."""
 from __future__ import annotations
 
 from functools import wraps
@@ -8,13 +8,13 @@ from flask import session, redirect, url_for, flash
 
 
 def login_required(f: Callable) -> Callable:
-    """Decorator to protect routes requiring authentication.
-    
+    """Decorator per proteggere le route che richiedono autenticazione.
+
     Usage:
         @app.route('/protected')
         @login_required
         def protected_route():
-            return "This requires login"
+            return "Richiede il login"
     """
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any) -> Any:
@@ -26,10 +26,10 @@ def login_required(f: Callable) -> Callable:
 
 
 def get_current_user() -> dict | None:
-    """Get current logged-in user from session.
-    
-    Returns:
-        User dict if logged in, None otherwise
+    """Recupera l'utente attualmente loggato dalla sessione.
+
+    Ritorna:
+        Dizionario utente se loggato, altrimenti None
     """
     if "user_id" in session:
         from f1api.auth_repository import get_auth_repo
@@ -39,9 +39,9 @@ def get_current_user() -> dict | None:
 
 
 def is_authenticated() -> bool:
-    """Check if user is authenticated.
-    
-    Returns:
-        True if user is logged in, False otherwise
+    """Verifica se l'utente è autenticato.
+
+    Ritorna:
+        True se l'utente è loggato, False altrimenti
     """
     return "user_id" in session
