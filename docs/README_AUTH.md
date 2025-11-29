@@ -17,6 +17,26 @@ F1API now includes a complete authentication system with secure user registratio
 
 The `users` table in `./data/users.db`:
 
+````markdown
+# Documentazione del sistema di autenticazione
+
+## Panoramica
+
+F1API include ora un sistema di autenticazione completo con registrazione sicura degli utenti, accesso (login) e gestione delle sessioni.
+
+## Funzionalità
+
+- ✅ **Registrazione utenti** - Creazione di nuovi account con username, email e password
+- ✅ **Login sicuro** - Password memorizzate in forma hash con bcrypt
+- ✅ **Gestione sessioni** - Sessioni sicure tramite cookie
+- ✅ **Rotte protette** - Usa il decoratore `@login_required`
+- ✅ **Messaggi flash** - Feedback visivo per le azioni dell'utente
+- ✅ **Database SQLite** - Persistenza degli utenti
+
+## Schema del database
+
+La tabella `users` in `./data/users.db`:
+
 ```sql
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,42 +48,42 @@ CREATE TABLE users (
 );
 ```
 
-## Routes
+## Rotte
 
-### Public Routes
+### Rotte pubbliche
 
-- `GET /` - Home page (shows different content for logged-in users)
-- `GET /auth/register` - Registration form
-- `POST /auth/register` - Process registration
-- `GET /auth/login` - Login form
-- `POST /auth/login` - Process login
+- `GET /` - Pagina principale (mostra contenuti diversi per utenti autenticati)
+- `GET /auth/register` - Form di registrazione
+- `POST /auth/register` - Elabora la registrazione
+- `GET /auth/login` - Form di login
+- `POST /auth/login` - Elabora il login
 
-### Protected Routes (require login)
+### Rotte protette (richiedono login)
 
-- `GET /auth/logout` - Logout (clears session)
-- `GET /auth/profile` - User profile page
+- `GET /auth/logout` - Logout (cancella la sessione)
+- `GET /auth/profile` - Pagina profilo utente
 
-## Usage Examples
+## Esempi d'uso
 
-### Register a New User
+### Registrare un nuovo utente
 
-1. Navigate to `/auth/register`
-2. Fill in:
-   - Username (3-20 chars, alphanumeric + underscore)
-   - Email (valid email format)
-   - Password (minimum 6 characters)
-   - Confirm password
-3. Submit the form
-4. On success, you'll be redirected to login
+1. Vai su `/auth/register`
+2. Compila:
+   - Username (3-20 caratteri, alfanumerico + underscore)
+   - Email (formato valido)
+   - Password (minimo 6 caratteri)
+   - Conferma password
+3. Invia il form
+4. Se la registrazione ha successo sarai reindirizzato alla pagina di login
 
 ### Login
 
-1. Navigate to `/auth/login`
-2. Enter username and password
-3. Submit the form
-4. On success, you'll be redirected to the home page
+1. Vai su `/auth/login`
+2. Inserisci username e password
+3. Invia il form
+4. Se il login ha successo sarai reindirizzato alla home
 
-### Protect a Route
+### Proteggere una rotta
 
 ```python
 from f1api.auth_decorators import login_required
@@ -74,7 +94,7 @@ def protected_route():
     return "This requires login"
 ```
 
-### Get Current User
+### Ottenere l'utente corrente
 
 ```python
 from f1api.auth_decorators import get_current_user, is_authenticated
@@ -87,65 +107,65 @@ def dashboard():
     return "Please log in"
 ```
 
-## Configuration
+## Configurazione
 
-Set these environment variables in `.env`:
+Imposta queste variabili d'ambiente in `.env`:
 
 ```bash
-# Flask secret key for session management
+# Chiave segreta di Flask per la gestione delle sessioni
 SECRET_KEY=your-secret-key-here
 
-# Path to users database
+# Percorso al database utenti
 AUTH_DB_PATH=./data/users.db
 
-# Session cookie security (set to True in production with HTTPS)
+# Sicurezza del cookie di sessione (metti True in produzione con HTTPS)
 SESSION_COOKIE_SECURE=False
 ```
 
-Generate a secure SECRET_KEY:
+Generare una `SECRET_KEY` sicura:
 
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-## Security Features
+## Misure di sicurezza
 
-1. **Password Hashing** - Uses bcrypt with automatic salting
-2. **Secure Sessions** - HTTPOnly cookies prevent XSS
-3. **CSRF Protection** - Session tokens protect against CSRF
-4. **Input Validation** - Username, email, and password validation
-5. **Unique Constraints** - Prevents duplicate usernames/emails
+1. **Hashing delle password** - Usa bcrypt con salting automatico
+2. **Sessioni sicure** - Cookie con `HTTPOnly` per mitigare XSS
+3. **Protezione CSRF** - Token di sessione per prevenire CSRF
+4. **Validazione input** - Controlli su username, email e password
+5. **Vincoli di unicità** - Previene duplicati di username/email
 
-## Testing
+## Test
 
-Run the authentication test suite:
+Esegui la suite di test per l'autenticazione:
 
 ```bash
 python test_auth.py
 ```
 
-This will:
+Questo esegue:
 
-- Create a test user
-- Test password hashing
-- Test authentication
-- Verify all auth repository functions
+- Creazione di un utente di test
+- Verifica dell'hashing delle password
+- Test di autenticazione
+- Verifica delle funzioni del repository di autenticazione
 
-## Integration with Existing Routes
+## Integrazione con le rotte esistenti
 
-The authentication system is already integrated:
+Il sistema di autenticazione è già integrato con l'app:
 
-- **Navigation** - Login/Register or Profile/Logout buttons in header
-- **Home Page** - Shows personalized content for logged-in users
-- **Flash Messages** - Feedback for all auth actions
-- **Session State** - Persists across requests
+- **Navigazione** - Pulsanti Login/Register oppure Profile/Logout nell'header
+- **Home** - Mostra contenuti personalizzati per utenti autenticati
+- **Messaggi flash** - Feedback per tutte le azioni di autenticazione
+- **Stato di sessione** - Persiste tra le richieste
 
-## Flash Message Categories
+## Categorie dei messaggi flash
 
-- `success` - Green, for successful operations
-- `danger` - Red, for errors
-- `warning` - Yellow, for warnings
-- `info` - Blue, for informational messages
+- `success` - Verde, per operazioni riuscite
+- `danger` - Rosso, per errori
+- `warning` - Giallo, per avvisi
+- `info` - Blu, per messaggi informativi
 
 ## API
 
@@ -174,36 +194,36 @@ exists = auth.email_exists("email@example.com")
 auth.update_last_login(user_id)
 ```
 
-## Troubleshooting
+## Risoluzione dei problemi
 
-**Problem**: "Import bcrypt could not be resolved"  
-**Solution**: Install bcrypt: `pip install bcrypt`
+**Problema**: "Import bcrypt could not be resolved"  
+**Soluzione**: Installa bcrypt: `pip install bcrypt`
 
-**Problem**: Session not persisting  
-**Solution**: Make sure `SECRET_KEY` is set in environment or `.env`
+**Problema**: La sessione non persiste  
+**Soluzione**: Assicurati che `SECRET_KEY` sia impostata nell'ambiente o in `.env`
 
-**Problem**: Database errors  
-**Solution**: Check `./data/` directory exists and is writable
+**Problema**: Errori sul database  
+**Soluzione**: Verifica che la cartella `./data/` esista ed sia scrivibile
 
-**Problem**: Flash messages not showing  
-**Solution**: Make sure your template extends `base.html`
+**Problema**: I messaggi flash non vengono mostrati  
+**Soluzione**: Assicurati che il tuo template estenda `base.html`
 
-## Future Enhancements
+## Miglioramenti futuri
 
-Possible improvements:
+Possibili estensioni:
 
-- Password reset via email
-- Two-factor authentication
-- OAuth integration (Google, GitHub, etc.)
-- Rate limiting for login attempts
-- Password strength requirements
-- User roles and permissions
-- Email verification
-- Remember me functionality
-- Account deletion
-- Profile editing
+- Reset password via email
+- Autenticazione a due fattori (2FA)
+- Integrazione OAuth (Google, GitHub, ecc.)
+- Limitazione delle richieste per tentativi di login
+- Requisiti di robustezza delle password
+- Ruoli utente e permessi
+- Verifica email
+- Funzionalità "remember me"
+- Eliminazione account
+- Modifica profilo
 
-## File Structure
+## Struttura dei file
 
 ```text
 src/f1api/
@@ -224,7 +244,3 @@ src/f1api/
 data/
 └── users.db                # SQLite user database
 ```
-
-## License
-
-Same as F1API project.

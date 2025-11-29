@@ -1,12 +1,10 @@
 # F1API
 
 ## Breve descrizione
------------------
+
 `F1API` è un'app Flask per esplorare dati di Formula 1 ottenuti dall'API pubblica F1Open. Fornisce pagine per visualizzare piloti, gare, sessioni e classifiche.
 
 ## Caratteristiche principali
-
--------------------------;
 
 - Liste e dettagli di piloti (`/drivers`, `/driver/<id>`).
 - Elenco gare e dettaglio meeting (`/races`, `/race/<meeting_key>`).
@@ -14,25 +12,21 @@
 
 ## Prerequisiti
 
-------------;
-
 - Python 3.10+ (3.12 consigliato)
 - Virtual environment (`venv`)
 
 ## Installazione (PowerShell - Windows)
 
------------------------------------;
-
 Apri PowerShell nella root del progetto e segui questi passi:
 
-1; Crea e attiva la venv:
+1. Crea e attiva la venv:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-2; Aggiorna `pip` e installa le dipendenze:
+2. Aggiorna `pip` e installa le dipendenze:
 
 ```powershell
 python -m pip install --upgrade pip
@@ -45,9 +39,42 @@ Opzione per sviluppo (editable):
 pip install -e .
 ```
 
-## Esecuzione
+## Installazione (Ubuntu / Bash)
 
-----------;
+Apri un terminale nella root del progetto e segui questi passi (Ubuntu 20.04+):
+
+1. Assicurati di avere Python e venv:
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip
+```
+
+2. Crea e attiva la virtualenv:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3. Aggiorna `pip` e installa le dipendenze:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Opzione per sviluppo (editable):
+
+```bash
+pip install -e .
+```
+
+Note su Python 3 vs `python`/`python3`
+
+Alcune distribuzioni usano `python3` come comando; dopo aver attivato la virtualenv, `python` punta di solito all'interprete corretto.
+
+## Esecuzione
 
 Per avviare l'app:
 
@@ -65,14 +92,10 @@ python -m f1api.app
 
 Variabili d'ambiente e `.env`
 
------------------------------;
-
 - Per sviluppo puoi creare un file `.env` nella root con le variabili locali. Assicurati di non commitare segreti.
 - VSCode può caricare automaticamente il file `.env` se configurato.
 
 ## Struttura rilevante del progetto
-
--------------------------------;
 
 - `src/f1api/`
 	- `app.py` — factory Flask e registrazione blueprint
